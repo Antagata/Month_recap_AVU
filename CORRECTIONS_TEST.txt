@@ -1,0 +1,19 @@
+====================================================================================================
+WINE CORRECTIONS FILE
+Generated: 2025-11-04 20:22:05
+====================================================================================================
+
+INSTRUCTIONS:
+----------------------------------------------------------------------------------------------------
+1. For each wine below, look up the correct Item Number in your Excel
+2. Replace 'YOUR_ITEM_NO_HERE' with the actual Item Number
+3. Save this file as 'CORRECTIONS_[timestamp].txt'
+4. Run: python apply_corrections.py CORRECTIONS_[timestamp].txt
+   (This will update the learning database with your corrections)
+
+Format: Wine Name | Vintage | Item No. | Notes
+====================================================================================================
+
+[1] Some Random Wine That Doesn't Exist 2025
+Some Random Wine That Doesn't Exist | 2025 | 99999 | NOT FOUND - Please add correct Item No.
+

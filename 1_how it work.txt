@@ -1,3 +1,24 @@
 1 download OMT main offer list and replace Conversion_month.xlsx
 
 runn app
+
+
+🎯 How It Works
+Simple 3-Step Process:
+Add wines to ItemNoGenerator.txt:
+Château Lafite Rothschild 2005
+Barolo Monfortino Riserva 2004
+Pétrus 2010
+Run the script:
+python wine_item_matcher.py
+Check results:
+Results report shows Item Numbers with similarity scores
+Learning database grows automatically
+
+
+
+[wine_names_learning_db.txt](c:\Users\Marco.Africani\Desktop\Month recap\wine_names_learning_db.txt)
+Cumulative learning database
+Grows with each run
+Tracks all wines processed with timestamps
+Never delete this file - it's your training data!

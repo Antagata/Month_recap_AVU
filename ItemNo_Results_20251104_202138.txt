@@ -1,13 +1,13 @@
 ====================================================================================================
 WINE ITEM NUMBER MATCHING RESULTS
-Generated: 2025-11-04 19:45:55
+Generated: 2025-11-04 20:21:38
 ====================================================================================================
 
 SUMMARY
 ----------------------------------------------------------------------------------------------------
 Total wines processed: 9
-Successfully matched: 8 (88.9%)
-Not matched: 1 (11.1%)
+Successfully matched: 9 (100.0%)
+Not matched: 0 (0.0%)
 
 
 RESULTS TABLE
@@ -21,7 +21,7 @@ Latour                                   2009       2711         100.0%       �
 Lafite                                   2005       7046         80.0%        ✅ MATCHED
 Lafleur                                  2022       63011        100.0%       ✅ MATCHED
 Montrose                                 2021       55554        100.0%       ✅ MATCHED
-Pavie                                    2021                    N/A          ❌ NOT FOUND
+Pavie                                    2021       55416        100.0%       ✅ MATCHED
 Grange                                   2019       59604        100.0%       ✅ MATCHED
 
 
@@ -86,7 +86,11 @@ DETAILED RESULTS
 
 [8] Pavie 2021
     Parsed: Pavie | Vintage: 2021
-    ❌ NOT FOUND in database
+    ✅ MATCHED: Item No. 55416
+       Excel Name: Pavie
+       Producer: Château Pavie
+       Size: 75.0 cl
+       Similarity: 100.0%
 
 [9] Grange 2019
     Parsed: Grange | Vintage: 2019
