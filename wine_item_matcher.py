@@ -217,9 +217,11 @@ def update_learning_database(wine_entries, learning_db_path):
     """
     Update the learning database with processed wine names.
     This database grows over time and helps improve future matching.
+    Prevents duplicate entries (same wine + vintage + item_no).
     """
-    # Load existing database
-    existing_entries = set()
+    # Load existing database as unique keys (wine|vintage|item_no)
+    existing_keys = set()
+    existing_lines = []
 
     if Path(learning_db_path).exists():
         try:
@@ -227,24 +229,38 @@ def update_learning_database(wine_entries, learning_db_path):
                 for line in f:
                     line = line.strip()
                     if line and not line.startswith('#'):
-                        existing_entries.add(line)
+                        existing_lines.append(line)
+                        # Extract key: wine_name|vintage|item_no (ignore timestamp)
+                        parts = line.split(' | ')
+                        if len(parts) >= 3:
+                            key = f"{parts[0]}|{parts[1]}|{parts[2]}"
+                            existing_keys.add(key)
         except Exception as e:
             print(f"⚠️  Warning: Could not read learning database: {e}")
 
-    # Add new entries
+    # Add new entries (only if unique)
     new_entries = []
+    duplicate_count = 0
+
     for entry in wine_entries:
         wine_name = entry.get('wine_name', '')
         vintage = entry.get('vintage', '')
         item_no = entry.get('matched_item_no', '')
 
         if wine_name:
-            # Format: Wine Name | Vintage | Item No. | Timestamp
-            entry_line = f"{wine_name} | {vintage if vintage else 'N/A'} | {item_no if item_no else 'NOT_FOUND'} | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            # Create unique key
+            vintage_str = str(vintage) if vintage else 'N/A'
+            item_no_str = str(item_no) if item_no else 'NOT_FOUND'
+            key = f"{wine_name}|{vintage_str}|{item_no_str}"
 
-            if entry_line not in existing_entries:
+            # Only add if not already in database
+            if key not in existing_keys:
+                # Format: Wine Name | Vintage | Item No. | Timestamp
+                entry_line = f"{wine_name} | {vintage_str} | {item_no_str} | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 new_entries.append(entry_line)
-                existing_entries.add(entry_line)
+                existing_keys.add(key)
+            else:
+                duplicate_count += 1
 
     # Write updated database
     try:
@@ -261,12 +277,91 @@ def update_learning_database(wine_entries, learning_db_path):
 
         if new_entries:
             print(f"\n✅ Added {len(new_entries)} new entries to learning database")
-            print(f"   Total entries in database: {len(existing_entries)}")
+            if duplicate_count > 0:
+                print(f"   ⏭️  Skipped {duplicate_count} duplicate entries")
+            print(f"   Total unique entries in database: {len(existing_keys)}")
         else:
-            print(f"\n✅ Learning database already up to date ({len(existing_entries)} entries)")
+            print(f"\n✅ Learning database already up to date ({len(existing_keys)} unique entries)")
+            if duplicate_count > 0:
+                print(f"   ⏭️  All {duplicate_count} entries were duplicates (already in database)")
 
     except Exception as e:
         print(f"\n❌ Error updating learning database: {e}")
+
+
+def create_correction_file(wine_entries, output_dir):
+    """
+    Create a correction file for wines that were NOT FOUND or have low similarity.
+    This allows manual correction by adding the correct Item No.
+
+    Format: Wine Name | Vintage | ITEM_NO_TO_ADD | Notes
+    """
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    correction_file = Path(output_dir) / f"CORRECTIONS_NEEDED_{timestamp}.txt"
+
+    # Find wines needing correction
+    wines_needing_correction = []
+
+    for entry in wine_entries:
+        # Include if NOT FOUND or low similarity (< 80%)
+        item_no = entry.get('matched_item_no')
+        similarity = entry.get('similarity', 0)
+
+        if not item_no or similarity < 0.8:
+            wines_needing_correction.append(entry)
+
+    if not wines_needing_correction:
+        # No corrections needed
+        return None
+
+    try:
+        with open(correction_file, 'w', encoding='utf-8') as f:
+            # Header
+            f.write("="*100 + "\n")
+            f.write("WINE CORRECTIONS FILE\n")
+            f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write("="*100 + "\n\n")
+
+            f.write("INSTRUCTIONS:\n")
+            f.write("-"*100 + "\n")
+            f.write("1. For each wine below, look up the correct Item Number in your Excel\n")
+            f.write("2. Replace 'YOUR_ITEM_NO_HERE' with the actual Item Number\n")
+            f.write("3. Save this file as 'CORRECTIONS_[timestamp].txt'\n")
+            f.write("4. Run: python apply_corrections.py CORRECTIONS_[timestamp].txt\n")
+            f.write("   (This will update the learning database with your corrections)\n")
+            f.write("\n")
+            f.write("Format: Wine Name | Vintage | Item No. | Notes\n")
+            f.write("="*100 + "\n\n")
+
+            # List wines needing correction
+            for i, entry in enumerate(wines_needing_correction, 1):
+                wine_name = entry.get('wine_name', '')
+                vintage = str(entry.get('vintage', 'N/A'))
+                original_text = entry.get('original_text', '')
+                item_no = entry.get('matched_item_no', '')
+                similarity = entry.get('similarity', 0)
+
+                f.write(f"[{i}] {original_text}\n")
+
+                if not item_no:
+                    # Not found - needs manual lookup
+                    f.write(f"{wine_name} | {vintage} | YOUR_ITEM_NO_HERE | NOT FOUND - Please add correct Item No.\n")
+                else:
+                    # Low similarity - needs verification
+                    excel_name = entry.get('excel_wine_name', '')
+                    f.write(f"{wine_name} | {vintage} | {item_no} | LOW SIMILARITY ({similarity:.1%}) - Matched to '{excel_name}' - Verify if correct\n")
+
+                f.write("\n")
+
+        print(f"\n⚠️  CORRECTIONS FILE CREATED: {correction_file}")
+        print(f"   {len(wines_needing_correction)} wines need manual review")
+        print(f"   Please review and correct Item Numbers in this file")
+
+        return correction_file
+
+    except Exception as e:
+        print(f"\n❌ Error creating correction file: {e}")
+        return None
 
 
 def generate_output_report(wine_entries, output_dir):
@@ -411,6 +506,10 @@ def main():
     print("\nStep 5: Updating learning database...")
     update_learning_database(wine_entries, LEARNING_DB_FILE)
 
+    # Create correction file for wines needing review
+    print("\nStep 6: Checking for wines needing correction...")
+    correction_file = create_correction_file(wine_entries, OUTPUT_DIR)
+
     print("\n" + "="*100)
     print("✅ PROCESSING COMPLETE")
     print("="*100)
@@ -418,10 +517,17 @@ def main():
     # Summary
     total = len(wine_entries)
     matched = sum(1 for e in wine_entries if e.get('matched_item_no'))
+    needs_review = sum(1 for e in wine_entries if not e.get('matched_item_no') or e.get('similarity', 0) < 0.8)
+
     print(f"\n📊 Summary: {matched}/{total} wines matched ({matched/total*100:.1f}%)")
+    if needs_review > 0:
+        print(f"   ⚠️  {needs_review} wines need manual review")
+
     print(f"\n💾 Files created:")
     print(f"   - Results report: ItemNo_Results_[timestamp].txt")
     print(f"   - Learning database: {LEARNING_DB_FILE}")
+    if correction_file:
+        print(f"   - Corrections needed: {correction_file.name}")
 
 
 if __name__ == "__main__":
