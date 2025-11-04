@@ -26,6 +26,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 WORD_FILE_PATH = r"C:\Users\Marco.Africani\Desktop\Month recap\month recap.docx"
 EXCEL_FILE_PATH = r"C:\Users\Marco.Africani\Desktop\Month recap\Conversion_month.xlsx"
 NEW_WORD_FILE_PATH = r"C:\Users\Marco.Africani\Desktop\Month recap\month recap_EUR.docx"
+LINES_EXCEL_PATH = r"C:\Users\Marco.Africani\Desktop\Month recap\Lines.xlsx"
 
 # Excel column names
 CHF_COL = 'Unit Price'
@@ -38,6 +39,7 @@ MIN_QUANTITY_COL = 'Minimum Quantity'
 COMPETITOR_CODE_COL = 'Competitor Code'
 PRODUCER_NAME_COL = 'Producer Name'
 VINTAGE_COL = 'Vintage'
+ITEM_NO_COL = 'Item No.'
 
 # Define Regex Patterns
 # Match numbers with decimals, including Swiss format with apostrophe or curly quote (e.g., 1'500.00, 1'500.00)
@@ -49,6 +51,9 @@ CHF_NUMBER_NO_DECIMAL = r"[Cc][Hh][Ff]\s+(\d+(?:['\u2019]\d{3})*)(?![.\d])"
 
 # Pattern to catch "NUMBER CHF" format without decimals (e.g., "190 CHF")
 NUMBER_THEN_CHF = r"(\d+(?:['\u2019]\d{3})*)\s+[Cc][Hh][Ff]"
+
+# Pattern to catch "NUMBER.XXCHF" format (no space before CHF, e.g., "33.00CHF")
+NUMBER_NOSPACE_CHF = r"(\d+(?:['\u2019]\d{3})*\.\d{2})[Cc][Hh][Ff]"
 
 # Fuzzy matching threshold (0-1, where 1 is exact match)
 FUZZY_MATCH_THRESHOLD = 0.5
@@ -197,13 +202,29 @@ def detect_quantity_indicator(text, price_match_start):
     return 0
 
 
+def detect_size_indicator(text, price_match_start):
+    """
+    Detect size indicators near the price (e.g., "Magnum" for 150cl).
+    Returns the size in cl (75 for standard, 150 for Magnum, etc.)
+    """
+    # Look in context around the price (within 50 chars before)
+    context_before = text[max(0, price_match_start - 50):price_match_start].lower()
+
+    # Check for Magnum indicator (150cl)
+    if re.search(r'\bmagnum\b', context_before):
+        return 150.0
+
+    # Default to standard bottle size (75cl)
+    return 75.0
+
+
 def extract_vintage_from_context(text, price_match_start):
     """
     Extract vintage year from context around the price.
     Returns integer year or None.
     """
-    # Look in wider context
-    context = text[max(0, price_match_start - 300):min(len(text), price_match_start + 100)]
+    # Look in wider context (up to 600 chars before to catch vintage at paragraph start)
+    context = text[max(0, price_match_start - 600):min(len(text), price_match_start + 100)]
 
     # Find 4-digit years (vintage years typically 1990-2030)
     year_matches = re.findall(r'\b(19[9]\d|20[0-3]\d)\b', context)
@@ -304,6 +325,7 @@ def load_data_and_document():
     """Loads the Excel data, creates the conversion map, and loads the Word document."""
     conversion_map = {}
     wine_data_map = defaultdict(list)  # CHF -> list of full row data
+    item_number_map = {}  # Item No. -> wine data (bulletproof matching)
     duplicate_chf_prices = set()
     doc = None
     df_full = None  # Store full dataframe for reference
@@ -337,9 +359,15 @@ def load_data_and_document():
             min_qty = row.get(MIN_QUANTITY_COL, 0)
             competitor_code = row.get(COMPETITOR_CODE_COL, None)
             producer_name = str(row.get(PRODUCER_NAME_COL, '')).strip()
-            vintage = row.get(VINTAGE_COL, None)
+            vintage_raw = row.get(VINTAGE_COL, None)
+            # Convert vintage to int for proper comparison with context_vintage (which is int)
+            try:
+                vintage = int(vintage_raw) if pd.notna(vintage_raw) else None
+            except (ValueError, TypeError):
+                vintage = None
+            item_no = row.get(ITEM_NO_COL, None)
 
-            wine_data_map[chf].append({
+            wine_data = {
                 'wine_name': wine,
                 'eur_value': eur,
                 'campaign_subtype': campaign_subtype,
@@ -348,8 +376,20 @@ def load_data_and_document():
                 'min_quantity': min_qty,
                 'competitor_code': competitor_code,
                 'producer_name': producer_name,
-                'vintage': vintage
-            })
+                'vintage': vintage,
+                'item_no': item_no,
+                'chf_value': chf
+            }
+
+            wine_data_map[chf].append(wine_data)
+
+            # Build item_number_map for bulletproof matching
+            # Item No. is unique per wine+vintage+size (same for qty=0 and qty=36)
+            if pd.notna(item_no):
+                item_key = int(item_no)
+                if item_key not in item_number_map:
+                    item_number_map[item_key] = []
+                item_number_map[item_key].append(wine_data)
 
         # For non-duplicate prices, create simple conversion map
         for chf, eur_set in chf_eur_mapping.items():
@@ -360,6 +400,7 @@ def load_data_and_document():
         print(f"   - Found {len(conversion_map)} unique CHF->EUR conversions")
         print(f"   - Found {len(duplicate_chf_prices)} duplicate CHF prices requiring wine name matching")
         print(f"   - Loaded {len(df)} rows with full metadata (Campaign Type, Size, Min Quantity)")
+        print(f"   - Built Item No. map with {len(item_number_map)} unique items for bulletproof matching")
 
     except FileNotFoundError:
         print(f"❌ Error: Excel file not found at {EXCEL_FILE_PATH}")
@@ -377,7 +418,7 @@ def load_data_and_document():
     except Exception as e:
         print(f"❌ Unexpected error loading Word file: {e}")
 
-    return doc, conversion_map, wine_data_map, duplicate_chf_prices
+    return doc, conversion_map, wine_data_map, duplicate_chf_prices, item_number_map
 
 
 def round_to_5_or_0(value):
@@ -400,9 +441,9 @@ def round_to_5_or_0(value):
 
 
 def find_best_wine_match(chf_price, context_wine_name, wine_data_map, detected_quantity=0,
-                         context_vintage=None, context_producer=None):
+                         context_vintage=None, context_producer=None, detected_size=75.0, item_number_map=None):
     """
-    Find the best EUR conversion for a CHF price using wine name matching and filtering.
+    Find the best EUR conversion for a CHF price using Item No. matching (bulletproof) and wine name matching.
 
     Args:
         chf_price: CHF price string (e.g., "42.00")
@@ -411,17 +452,42 @@ def find_best_wine_match(chf_price, context_wine_name, wine_data_map, detected_q
         detected_quantity: Detected minimum quantity (0 or 36)
         context_vintage: Vintage year extracted from context (optional)
         context_producer: Producer name extracted from context (optional)
+        detected_size: Detected size in cl (75 for standard, 150 for Magnum)
+        item_number_map: Dictionary mapping Item No. to wine data (for bulletproof matching)
 
-    Returns (eur_value, match_quality)
+    Returns (eur_value, match_quality, wine_data_option)
     """
     if chf_price not in wine_data_map:
-        return None, 'not_found'
+        return None, 'not_found', None
 
     wine_options = wine_data_map[chf_price]
 
-    # If only one option, use it
+    # BULLETPROOF MATCHING: Try Item No. matching FIRST if we have vintage
+    # Item No. is unique per wine+vintage+size (same for both qty=0 and qty=36)
+    # This works for BOTH single and multiple options - Item No. is always most reliable
+    if item_number_map and context_vintage:
+        # Check all options for this CHF price
+        for option in wine_options:
+            item_no = option.get('item_no')
+            if pd.notna(item_no):
+                item_key = int(item_no)
+                if item_key in item_number_map:
+                    # Get all entries for this Item No. (should be qty=0 and qty=36 variants)
+                    item_entries = item_number_map[item_key]
+                    # Check if vintage and size match
+                    for entry in item_entries:
+                        if (entry.get('vintage') == context_vintage and
+                            entry.get('size') == detected_size and
+                            entry.get('min_quantity') == detected_quantity and
+                            entry.get('chf_value') == chf_price):
+                            # BULLETPROOF MATCH!
+                            return entry['eur_value'], 'item_no_match', entry
+
+    # Fallback: If only one option and Item No. didn't match, use it
     if len(wine_options) == 1:
-        return wine_options[0]['eur_value'], 'exact'
+        return wine_options[0]['eur_value'], 'exact', wine_options[0]
+
+    # Continue with existing matching logic if Item No. match not found
 
     # Multiple options - apply filters first
     # Filter 1: Campaign Sub-Type = "Normal"
@@ -430,11 +496,11 @@ def find_best_wine_match(chf_price, context_wine_name, wine_data_map, detected_q
     if not filtered_options:
         filtered_options = wine_options
 
-    # Filter 2: Size = 75 (for 75cl bottles)
-    size_75_options = [opt for opt in filtered_options if opt['size'] == 75.0 or opt['size'] == 75]
+    # Filter 2: Size = detected_size (75 for standard, 150 for Magnum, etc.)
+    size_matched_options = [opt for opt in filtered_options if opt['size'] == detected_size]
 
-    if size_75_options:
-        filtered_options = size_75_options
+    if size_matched_options:
+        filtered_options = size_matched_options
 
     # Filter 3: Match quantity (0 for normal, 36 for bulk)
     quantity_matched_options = [opt for opt in filtered_options if opt['min_quantity'] == detected_quantity]
@@ -444,18 +510,30 @@ def find_best_wine_match(chf_price, context_wine_name, wine_data_map, detected_q
 
         # VALIDATION: If detected_quantity == 36, ensure the price is different from normal (qty=0)
         # This prevents matching a normal price when "36 bottles" is mentioned
-        if detected_quantity == 36:
-            # Get all normal prices (qty=0) for this CHF value
-            normal_prices = [opt for opt in wine_options
-                           if opt['min_quantity'] == 0 and opt['size'] == 75.0]
-            if normal_prices:
-                # Get EUR values for normal prices
-                normal_eur_values = set(opt['eur_value'] for opt in normal_prices)
-                # Filter out any 36-bottle options that have the same EUR as normal
-                validated_options = [opt for opt in filtered_options
-                                   if opt['eur_value'] not in normal_eur_values]
-                if validated_options:
-                    filtered_options = validated_options
+        # IMPORTANT: Only compare prices for the SAME wine to avoid false filtering
+        if detected_quantity == 36 and len(filtered_options) > 1:
+            # For each 36-bottle option, check if there's a matching normal (qty=0) option
+            # for the SAME wine with the SAME EUR price
+            validated_options = []
+            for opt_36 in filtered_options:
+                # Find normal prices for the SAME wine
+                same_wine_normal = [opt for opt in wine_options
+                                  if opt['min_quantity'] == 0
+                                  and opt['size'] == detected_size
+                                  and opt['wine_name'] == opt_36['wine_name']]
+
+                if same_wine_normal:
+                    # Check if this 36x price differs from normal price for same wine
+                    normal_eur_values = set(opt['eur_value'] for opt in same_wine_normal)
+                    if opt_36['eur_value'] not in normal_eur_values:
+                        # This 36x price is different from normal, keep it
+                        validated_options.append(opt_36)
+                else:
+                    # No normal price for this wine, keep the 36x option
+                    validated_options.append(opt_36)
+
+            if validated_options:
+                filtered_options = validated_options
 
     # Filter 4: Competitor Code is empty (NaN) - PREFER these rows
     empty_competitor_options = [opt for opt in filtered_options
@@ -473,7 +551,9 @@ def find_best_wine_match(chf_price, context_wine_name, wine_data_map, detected_q
     # Filter 6: Match vintage if available
     if context_vintage and len(filtered_options) > 1:
         vintage_matched = [opt for opt in filtered_options
-                          if opt['vintage'] == context_vintage or opt['vintage'] == float(context_vintage)]
+                          if opt['vintage'] == context_vintage
+                          or opt['vintage'] == float(context_vintage)
+                          or opt['vintage'] == str(context_vintage)]
         if vintage_matched:
             filtered_options = vintage_matched
 
@@ -487,7 +567,7 @@ def find_best_wine_match(chf_price, context_wine_name, wine_data_map, detected_q
 
     # After filtering, if only one option remains, use it
     if len(filtered_options) == 1:
-        return filtered_options[0]['eur_value'], 'fuzzy_filtered'
+        return filtered_options[0]['eur_value'], 'fuzzy_filtered', filtered_options[0]
 
     # Multiple options remain - use intelligent matching
     if not context_wine_name and not context_producer:
@@ -496,8 +576,8 @@ def find_best_wine_match(chf_price, context_wine_name, wine_data_map, detected_q
             chf_float = float(chf_price)
             expected_eur = chf_float * 1.08
             best_option = min(filtered_options, key=lambda opt: abs(float(opt['eur_value']) - expected_eur))
-            return best_option['eur_value'], 'price_proximity'
-        return None, 'ambiguous'
+            return best_option['eur_value'], 'price_proximity', best_option
+        return None, 'ambiguous', None
 
     # Calculate similarity scores for each option
     scored_options = []
@@ -531,19 +611,156 @@ def find_best_wine_match(chf_price, context_wine_name, wine_data_map, detected_q
 
     # If good match (score > threshold), use it
     if best_score >= 1.0:  # Threshold for combined score
-        return best_option['eur_value'], 'fuzzy'
+        return best_option['eur_value'], 'fuzzy', best_option
 
     # Otherwise, use price proximity
     chf_float = float(chf_price)
     expected_eur = chf_float * 1.08
     best_by_price = min(filtered_options, key=lambda opt: abs(float(opt['eur_value']) - expected_eur))
-    return best_by_price['eur_value'], 'price_proximity'
+    return best_by_price['eur_value'], 'price_proximity', best_by_price
+
+
+def export_to_lines_excel(conversion_records, output_path):
+    """
+    Export conversion records to Lines.xlsx file.
+
+    Args:
+        conversion_records: List of conversion record dicts
+        output_path: Path to save the Lines.xlsx file
+    """
+    # Prepare data for Excel export
+    lines_data = []
+
+    # Process all records and extract data
+    processed_records = []
+    for record in conversion_records:
+        wine_data = record.get('wine_data')
+        match_type = record.get('match_type', '')
+
+        # PRIORITY 1: Use exact data from Excel wine_data when available
+        if wine_data and isinstance(wine_data, dict):
+            wine_name = wine_data.get('wine_name', '')
+            vintage = wine_data.get('vintage', '')
+            size = wine_data.get('size', '')
+            producer_name = wine_data.get('producer_name', '')
+            min_quantity = wine_data.get('min_quantity', 0)
+            item_no = wine_data.get('item_no', '')
+        # PRIORITY 2: Fallback to context extraction for formula-calculated prices
+        else:
+            wine_name = record.get('context_wine_name', '')
+            vintage = record.get('context_vintage', '')
+            size = record.get('detected_size', '')
+            producer_name = record.get('context_producer', '')
+            min_quantity = record.get('detected_min_quantity', 0)
+            item_no = ''
+
+        processed_records.append({
+            'wine_name': wine_name if wine_name else '',
+            'vintage': vintage if vintage else '',
+            'size': size if size else '',
+            'producer_name': producer_name if producer_name else '',
+            'min_quantity': min_quantity if min_quantity is not None else 0,
+            'chf_price': record.get('chf_price', ''),
+            'eur_price': record.get('eur_price', ''),
+            'match_type': match_type,
+            'item_no': item_no if item_no else ''
+        })
+
+    # Deduplicate: Keep only 2 rows per wine (Min Qty 0 and 36)
+    # Group by wine identifier (wine_name + vintage + producer_name)
+    wine_groups = {}
+    for rec in processed_records:
+        # Create unique key for each wine
+        wine_key = (rec['wine_name'], rec['vintage'], rec['producer_name'], rec['size'])
+
+        if wine_key not in wine_groups:
+            wine_groups[wine_key] = {'qty_0': None, 'qty_36': None}
+
+        min_qty = rec['min_quantity']
+
+        # Keep best match for each quantity level
+        if min_qty == 0:
+            # For qty=0, keep if we don't have one yet, or if this is a better match
+            if wine_groups[wine_key]['qty_0'] is None:
+                wine_groups[wine_key]['qty_0'] = rec
+            elif rec['match_type'] in ['direct', 'fuzzy_filtered', 'exact_match']:
+                # Prefer Excel matches over formula calculations
+                if wine_groups[wine_key]['qty_0']['match_type'] in ['fallback_1.08', 'market_price_1.08']:
+                    wine_groups[wine_key]['qty_0'] = rec
+        elif min_qty == 36:
+            # For qty=36, keep if we don't have one yet, or if this is a better match
+            if wine_groups[wine_key]['qty_36'] is None:
+                wine_groups[wine_key]['qty_36'] = rec
+            elif rec['match_type'] in ['direct', 'fuzzy_filtered', 'exact_match']:
+                # Prefer Excel matches over formula calculations
+                if wine_groups[wine_key]['qty_36']['match_type'] in ['fallback_1.08', 'market_price_1.08']:
+                    wine_groups[wine_key]['qty_36'] = rec
+
+    # Build final lines data with only kept records
+    group_code = 1
+    for wine_key, quantities in wine_groups.items():
+        # Add qty=0 row if exists
+        if quantities['qty_0']:
+            rec = quantities['qty_0']
+            row_data = {
+                'Wine Name': rec['wine_name'],
+                'Vintage Code': rec['vintage'],
+                'Size': rec['size'],
+                'Producer Name': rec['producer_name'],
+                'Minimum Quantity': rec['min_quantity'],
+                'Unit Price': rec['chf_price'],
+                'Unit Price Incl. VAT': '',
+                'Unit Price (EUR)': rec['eur_price'],
+                'Main Offer Comment': '',
+                'Competitor Code': '',
+                'Group Code': group_code,
+                'Match Type': rec['match_type'],
+                'Item No.': rec['item_no']
+            }
+            lines_data.append(row_data)
+
+        # Add qty=36 row if exists
+        if quantities['qty_36']:
+            rec = quantities['qty_36']
+            row_data = {
+                'Wine Name': rec['wine_name'],
+                'Vintage Code': rec['vintage'],
+                'Size': rec['size'],
+                'Producer Name': rec['producer_name'],
+                'Minimum Quantity': rec['min_quantity'],
+                'Unit Price': rec['chf_price'],
+                'Unit Price Incl. VAT': '',
+                'Unit Price (EUR)': rec['eur_price'],
+                'Main Offer Comment': '',
+                'Competitor Code': '',
+                'Group Code': group_code,
+                'Match Type': rec['match_type'],
+                'Item No.': rec['item_no']
+            }
+            lines_data.append(row_data)
+
+        group_code += 1  # Increment group code per wine
+
+    # Create DataFrame and export to Excel
+    df_lines = pd.DataFrame(lines_data)
+
+    # Save to Excel (overwrite if exists)
+    df_lines.to_excel(output_path, index=False, sheet_name='Lines')
+
+    print(f"\n✅ Lines Excel file saved as: {output_path}")
+    print(f"   Total lines exported: {len(lines_data)}")
+    print(f"   Unique wines: {len(wine_groups)}")
 
 
 def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_chf_prices,
-                         all_numbers_found, conversion_stats):
+                         all_numbers_found, conversion_stats, conversion_records, item_number_map):
     """
     Performs search and replace at the run level, applying highlighting based on conversion type.
+    Also tracks conversion data for Excel export.
+
+    Args:
+        conversion_records: List to append conversion record dicts to
+        item_number_map: Dictionary mapping Item No. to wine data (for bulletproof matching)
     """
 
     local_replacements = 0
@@ -579,6 +796,36 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
         if not any(chf == f"{number}.00" or chf == number for chf, _ in matches_with_positions):
             formatted_number = f"{number}.00"
             matches_with_positions.append((formatted_number, match.start()))
+
+    # Pattern 4: "33.00CHF" style (NUMBER.XX directly followed by CHF, no space)
+    number_nospace_chf_matches = re.finditer(NUMBER_NOSPACE_CHF, text)
+    for match in number_nospace_chf_matches:
+        # Remove both regular apostrophe and curly quote
+        number = match.group(1).replace("'", "").replace("'", "")
+        # Check if already matched (avoid duplicates)
+        if not any(chf == number for chf, _ in matches_with_positions):
+            matches_with_positions.append((number, match.start()))
+
+    # Pattern 5: "Magnum XX.XX" style (number after Magnum keyword, no CHF indicator)
+    # This is a special case for Magnum bottles where CHF may be omitted
+    magnum_pattern = r"\bMagnum\s+(\d+(?:['\u2019]\d{3})*\.\d{2})"
+    magnum_matches = re.finditer(magnum_pattern, text, re.IGNORECASE)
+    for match in magnum_matches:
+        number = match.group(1).replace("'", "").replace("'", "")
+        # Check if already matched (avoid duplicates)
+        if not any(chf == number for chf, _ in matches_with_positions):
+            matches_with_positions.append((number, match.start() + match.group().find(match.group(1))))
+
+    # Pattern 6: "36x XX.XX" style (number after 36x, may or may not have CHF)
+    # Special case for 36-bottle pricing where CHF may be omitted or attached
+    # This pattern should NOT match if Pattern 4 already matched (avoid "36x 33.00CHF")
+    thirtysix_pattern = r"\b36\s*x\s+(\d+(?:['\u2019]\d{3})*\.\d{2})(?![Cc][Hh][Ff])"
+    thirtysix_matches = re.finditer(thirtysix_pattern, text, re.IGNORECASE)
+    for match in thirtysix_matches:
+        number = match.group(1).replace("'", "").replace("'", "")
+        # Check if already matched (avoid duplicates)
+        if not any(chf == number for chf, _ in matches_with_positions):
+            matches_with_positions.append((number, match.start() + match.group().find(match.group(1))))
 
     # Dictionary of replacements: {chf_str: (new_eur_str, highlight_color_index, context)}
     replacements_to_do = {}
@@ -617,6 +864,9 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
         # Detect quantity indicator (0 or 36)
         detected_quantity = detect_quantity_indicator(text, position)
 
+        # Detect size indicator (75 or 150 for Magnum)
+        detected_size = detect_size_indicator(text, position)
+
         # If it's a market price reference, always use 1.08 conversion with RED highlight
         if is_market_price:
             try:
@@ -631,7 +881,54 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
 
         # Check if it's a known non-duplicate price
         elif chf_str in conversion_map:
-            eur_value = conversion_map[chf_str]
+            # Try bulletproof Item No. matching first, even for direct matches
+            wine_data = None
+
+            if context_vintage and item_number_map and chf_str in wine_data_map:
+                # Try Item No. matching
+                eur_from_item, quality_item, wine_from_item = find_best_wine_match(
+                    chf_str, context_wine, wine_data_map, detected_quantity,
+                    context_vintage, context_producer, detected_size, item_number_map
+                )
+
+                if quality_item == 'item_no_match':
+                    # Bulletproof match found!
+                    eur_value = eur_from_item
+                    wine_data = wine_from_item
+                    match_type = 'item_no_match'
+                    conversion_stats['exact_matched'] += 1
+                else:
+                    # No Item No. match, use direct conversion
+                    eur_value = conversion_map[chf_str]
+                    match_type = 'direct'
+                    conversion_stats['direct'] += 1
+
+                    # Get wine data for tracking
+                    if chf_str in wine_data_map:
+                        options = wine_data_map[chf_str]
+                        if len(options) == 1:
+                            wine_data = options[0]
+                        else:
+                            filtered = [opt for opt in options
+                                      if opt.get('size') == detected_size
+                                      and opt.get('min_quantity') == detected_quantity]
+                            wine_data = filtered[0] if filtered else options[0]
+            else:
+                # No vintage or Item No. map, use direct conversion
+                eur_value = conversion_map[chf_str]
+                match_type = 'direct'
+                conversion_stats['direct'] += 1
+
+                # Get wine data for tracking
+                if chf_str in wine_data_map:
+                    options = wine_data_map[chf_str]
+                    if len(options) == 1:
+                        wine_data = options[0]
+                    else:
+                        filtered = [opt for opt in options
+                                  if opt.get('size') == detected_size
+                                  and opt.get('min_quantity') == detected_quantity]
+                        wine_data = filtered[0] if filtered else options[0]
 
             # Apply rounding rule for prices above 300 CHF
             chf_float = float(chf_str)
@@ -640,17 +937,25 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
                 rounded_eur = round_to_5_or_0(eur_float)
                 eur_value = f"{rounded_eur:.2f}"
 
-            match_type = 'direct'
-            conversion_stats['direct'] += 1
-
         # Check if it's a duplicate requiring wine name matching
         elif chf_str in duplicate_chf_prices:
-            eur_value, quality = find_best_wine_match(
+            eur_value, quality, wine_data = find_best_wine_match(
                 chf_str, context_wine, wine_data_map, detected_quantity,
-                context_vintage, context_producer
+                context_vintage, context_producer, detected_size, item_number_map
             )
 
-            if quality == 'fuzzy' or quality == 'fuzzy_filtered' or quality == 'price_proximity':
+            if quality == 'item_no_match':
+                # BULLETPROOF Item No. match - no highlighting needed
+                # Apply rounding rule for prices above 300 CHF
+                chf_float = float(chf_str)
+                if chf_float > 300 and eur_value:
+                    eur_float = float(eur_value)
+                    rounded_eur = round_to_5_or_0(eur_float)
+                    eur_value = f"{rounded_eur:.2f}"
+
+                match_type = 'item_no_match'
+                conversion_stats['exact_matched'] += 1
+            elif quality == 'fuzzy' or quality == 'fuzzy_filtered' or quality == 'price_proximity':
                 # Apply rounding rule for prices above 300 CHF
                 chf_float = float(chf_str)
                 if chf_float > 300 and eur_value:
@@ -710,6 +1015,21 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
         if eur_value:
             replacements_to_do[chf_str] = (eur_value, highlight_color, context_wine, match_type)
 
+            # Track conversion for Excel export
+            # Store both context and wine_data - export function will prioritize wine_data
+            conversion_record = {
+                'chf_price': chf_str,
+                'eur_price': eur_value,
+                'context_wine_name': context_wine if context_wine else '',
+                'context_vintage': context_vintage if context_vintage else '',
+                'context_producer': context_producer if context_producer else '',
+                'detected_size': detected_size,
+                'detected_min_quantity': detected_quantity,
+                'match_type': match_type,
+                'wine_data': wine_data if 'wine_data' in locals() else None
+            }
+            conversion_records.append(conversion_record)
+
     # 2. Perform number replacement with highlighting (rebuilding runs)
     new_text = text
 
@@ -762,6 +1082,44 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
 
         for match in re.finditer(pattern3, text):
             all_replacements.append((match.start(), match.end(), f'{eur_value} EUR'))
+
+        # Pattern 4: Number.XX directly followed by CHF (no space) - e.g., "33.00CHF"
+        # Matches: "33.00CHF", "1150.00CHF", "1'150.00CHF"
+        if len(chf_int) == 4:
+            pattern4 = chf_int[0] + r"['\u2019]?" + chf_int[1:] + r"\.00[Cc][Hh][Ff]"
+        elif len(chf_int) == 5:
+            pattern4 = chf_int[:2] + r"['\u2019]?" + chf_int[2:] + r"\.00[Cc][Hh][Ff]"
+        else:
+            pattern4 = re.escape(chf_int) + r"\.00[Cc][Hh][Ff]"
+
+        for match in re.finditer(pattern4, text):
+            all_replacements.append((match.start(), match.end(), f'{eur_value} EUR'))
+
+        # Pattern 5: Magnum followed by number (no CHF indicator) - e.g., "Magnum 52.00"
+        # Matches: "Magnum 52.00", "Magnum 1'150.00"
+        if len(chf_int) == 4:
+            pattern5 = r"\bMagnum\s+" + chf_int[0] + r"['\u2019]?" + chf_int[1:] + r"\.00"
+        elif len(chf_int) == 5:
+            pattern5 = r"\bMagnum\s+" + chf_int[:2] + r"['\u2019]?" + chf_int[2:] + r"\.00"
+        else:
+            pattern5 = r"\bMagnum\s+" + re.escape(chf_int) + r"\.00"
+
+        for match in re.finditer(pattern5, text, re.IGNORECASE):
+            # Replace "Magnum XX.XX" with "Magnum YY.YY EUR"
+            all_replacements.append((match.start(), match.end(), f'Magnum {eur_value} EUR'))
+
+        # Pattern 6: 36x followed by number (no CHF after) - e.g., "36x 99.00 + VAT"
+        # Matches: "36x 99.00", "36x 1'150.00" but NOT "36x 33.00CHF"
+        if len(chf_int) == 4:
+            pattern6 = r"\b36\s*x\s+" + chf_int[0] + r"['\u2019]?" + chf_int[1:] + r"\.00(?![Cc][Hh][Ff])"
+        elif len(chf_int) == 5:
+            pattern6 = r"\b36\s*x\s+" + chf_int[:2] + r"['\u2019]?" + chf_int[2:] + r"\.00(?![Cc][Hh][Ff])"
+        else:
+            pattern6 = r"\b36\s*x\s+" + re.escape(chf_int) + r"\.00(?![Cc][Hh][Ff])"
+
+        for match in re.finditer(pattern6, text, re.IGNORECASE):
+            # Replace "36x XX.XX" with "36x YY.YY EUR"
+            all_replacements.append((match.start(), match.end(), f'36x {eur_value} EUR'))
 
     # Remove overlapping replacements (keep the longest match at each position)
     all_replacements.sort(key=lambda x: (x[0], -(x[1] - x[0])))  # Sort by start, then by length descending
@@ -851,6 +1209,43 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
     return local_replacements
 
 
+def clean_apostrophes_in_numbers(doc):
+    """
+    Remove apostrophes (both ' and ') from numbers in the document.
+    This preprocesses the document to avoid issues with Swiss number formatting.
+    Example: 1'500.00 CHF -> 1500.00 CHF
+    """
+    apostrophes_removed = 0
+
+    # Process all paragraphs
+    for paragraph in doc.paragraphs:
+        for run in paragraph.runs:
+            original_text = run.text
+            # Replace curly apostrophe (U+2019) and regular apostrophe in numbers
+            # Pattern: digit + apostrophe + digit
+            cleaned_text = re.sub(r"(\d)['\u2019](\d)", r'\1\2', original_text)
+            if cleaned_text != original_text:
+                run.text = cleaned_text
+                apostrophes_removed += 1
+
+    # Process all tables
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        original_text = run.text
+                        cleaned_text = re.sub(r"(\d)['\u2019](\d)", r'\1\2', original_text)
+                        if cleaned_text != original_text:
+                            run.text = cleaned_text
+                            apostrophes_removed += 1
+
+    if apostrophes_removed > 0:
+        print(f"✅ Preprocessed document: removed apostrophes from {apostrophes_removed} number(s)")
+
+    return doc
+
+
 def main():
     """Main function to orchestrate the conversion process."""
 
@@ -858,11 +1253,14 @@ def main():
     print("CHF to EUR Converter with Wine Name Matching")
     print("="*80 + "\n")
 
-    doc, conversion_map, wine_data_map, duplicate_chf_prices = load_data_and_document()
+    doc, conversion_map, wine_data_map, duplicate_chf_prices, item_number_map = load_data_and_document()
 
     if not doc:
         print("\nOperation aborted due to file loading errors.")
         return
+
+    # PREPROCESSING: Remove apostrophes from numbers to avoid formatting issues
+    doc = clean_apostrophes_in_numbers(doc)
 
     total_replacements = 0
     all_numbers_found = []
@@ -874,11 +1272,14 @@ def main():
         'fallback': 0
     }
 
+    # List to track all conversions for Excel export
+    conversion_records = []
+
     # 1. Iterate through all paragraphs in the document
     for paragraph in doc.paragraphs:
         total_replacements += replace_and_highlight(
             paragraph, conversion_map, wine_data_map,
-            duplicate_chf_prices, all_numbers_found, conversion_stats
+            duplicate_chf_prices, all_numbers_found, conversion_stats, conversion_records, item_number_map
         )
 
     # 2. Iterate through all tables in the document (if any)
@@ -888,7 +1289,7 @@ def main():
                 for paragraph in cell.paragraphs:
                     total_replacements += replace_and_highlight(
                         paragraph, conversion_map, wine_data_map,
-                        duplicate_chf_prices, all_numbers_found, conversion_stats
+                        duplicate_chf_prices, all_numbers_found, conversion_stats, conversion_records, item_number_map
                     )
 
     # --- Statistics Report ---
@@ -938,6 +1339,17 @@ def main():
         print("  No highlight = Direct match from Excel")
     except Exception as e:
         print(f"\n❌ Error saving the new Word file: {e}")
+
+    # 4. Export conversion data to Lines.xlsx
+    try:
+        export_to_lines_excel(conversion_records, LINES_EXCEL_PATH)
+    except PermissionError:
+        print(f"\n⚠️  Could not save Lines.xlsx - file may be open in Excel.")
+        print(f"   Please close {LINES_EXCEL_PATH} and run the converter again.")
+    except Exception as e:
+        print(f"\n❌ Error exporting to Lines.xlsx: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == "__main__":
