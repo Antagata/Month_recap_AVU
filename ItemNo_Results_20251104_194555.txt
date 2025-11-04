@@ -1,0 +1,98 @@
+====================================================================================================
+WINE ITEM NUMBER MATCHING RESULTS
+Generated: 2025-11-04 19:45:55
+====================================================================================================
+
+SUMMARY
+----------------------------------------------------------------------------------------------------
+Total wines processed: 9
+Successfully matched: 8 (88.9%)
+Not matched: 1 (11.1%)
+
+
+RESULTS TABLE
+----------------------------------------------------------------------------------------------------
+Wine Name                                Vintage    Item No.     Similarity   Status
+----------------------------------------------------------------------------------------------------
+Barolo Monfortino Riserva                2004       15971        100.0%       ✅ MATCHED
+Château Margaux                          2018       49476        100.0%       ✅ MATCHED
+Margaux                                  2018       49476        100.0%       ✅ MATCHED
+Latour                                   2009       2711         100.0%       ✅ MATCHED
+Lafite                                   2005       7046         80.0%        ✅ MATCHED
+Lafleur                                  2022       63011        100.0%       ✅ MATCHED
+Montrose                                 2021       55554        100.0%       ✅ MATCHED
+Pavie                                    2021                    N/A          ❌ NOT FOUND
+Grange                                   2019       59604        100.0%       ✅ MATCHED
+
+
+DETAILED RESULTS
+====================================================================================================
+
+[1] Barolo Monfortino Riserva 2004
+    Parsed: Barolo Monfortino Riserva | Vintage: 2004
+    ✅ MATCHED: Item No. 15971
+       Excel Name: Barolo Monfortino Riserva
+       Producer: Giacomo Conterno
+       Size: 75.0 cl
+       Similarity: 100.0%
+
+[2] Château Margaux 2018
+    Parsed: Château Margaux | Vintage: 2018
+    ✅ MATCHED: Item No. 49476
+       Excel Name: Margaux
+       Producer: Château Margaux
+       Size: 600.0 cl
+       Similarity: 100.0%
+
+[3] Margaux 2018
+    Parsed: Margaux | Vintage: 2018
+    ✅ MATCHED: Item No. 49476
+       Excel Name: Margaux
+       Producer: Château Margaux
+       Size: 600.0 cl
+       Similarity: 100.0%
+
+[4] Latour 2009
+    Parsed: Latour | Vintage: 2009
+    ✅ MATCHED: Item No. 2711
+       Excel Name: Latour
+       Producer: Château Latour
+       Size: 150.0 cl
+       Similarity: 100.0%
+
+[5] Lafite 2005
+    Parsed: Lafite | Vintage: 2005
+    ✅ MATCHED: Item No. 7046
+       Excel Name: Lafite Rothschild
+       Producer: Château Lafite Rothschild
+       Size: 600.0 cl
+       Similarity: 80.0%
+
+[6] Lafleur 2022
+    Parsed: Lafleur | Vintage: 2022
+    ✅ MATCHED: Item No. 63011
+       Excel Name: Lafleur
+       Producer: Château Lafleur
+       Size: 150.0 cl
+       Similarity: 100.0%
+
+[7] Montrose 2021
+    Parsed: Montrose | Vintage: 2021
+    ✅ MATCHED: Item No. 55554
+       Excel Name: Montrose
+       Producer: Château Montrose
+       Size: 300.0 cl
+       Similarity: 100.0%
+
+[8] Pavie 2021
+    Parsed: Pavie | Vintage: 2021
+    ❌ NOT FOUND in database
+
+[9] Grange 2019
+    Parsed: Grange | Vintage: 2019
+    ✅ MATCHED: Item No. 59604
+       Excel Name: Grange
+       Producer: Penfolds
+       Size: 75.0 cl
+       Similarity: 100.0%
+

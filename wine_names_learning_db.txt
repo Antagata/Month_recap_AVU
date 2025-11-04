@@ -1,0 +1,14 @@
+# Wine Names Learning Database
+# Format: Wine Name | Vintage | Item No. | Timestamp
+# This file grows over time and helps improve wine name recognition
+#================================================================================
+
+Barolo Monfortino Riserva | 2004 | 15971 | 2025-11-04 19:45:55
+Château Margaux | 2018 | 49476 | 2025-11-04 19:45:55
+Margaux | 2018 | 49476 | 2025-11-04 19:45:55
+Latour | 2009 | 2711 | 2025-11-04 19:45:55
+Lafite | 2005 | 7046 | 2025-11-04 19:45:55
+Lafleur | 2022 | 63011 | 2025-11-04 19:45:55
+Montrose | 2021 | 55554 | 2025-11-04 19:45:55
+Pavie | 2021 | NOT_FOUND | 2025-11-04 19:45:55
+Grange | 2019 | 59604 | 2025-11-04 19:45:55
