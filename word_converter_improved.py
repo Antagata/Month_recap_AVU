@@ -833,10 +833,20 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
     for chf_str, position in matches_with_positions:
 
         # --- VINTAGE/YEAR SKIP CHECK ---
+        # Skip numbers that look like years (1000-9999) UNLESS they have CHF/EUR context
         try:
             float_val = float(chf_str)
             if float_val.is_integer() and 1000 <= int(float_val) <= 9999:
-                continue
+                # Check if CHF or EUR appears within 20 characters of this position
+                context_start = max(0, position - 20)
+                context_end = min(len(text), position + len(chf_str) + 20)
+                context = text[context_start:context_end]
+
+                # If CHF or EUR is in the context, this is a price, not a year
+                if re.search(r'\b(CHF|EUR|chf|eur)\b', context):
+                    pass  # Don't skip, it's a price
+                else:
+                    continue  # Skip, it's likely a year
         except ValueError:
             continue
 
@@ -1211,22 +1221,49 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
 
 def clean_apostrophes_in_numbers(doc):
     """
-    Remove apostrophes (both ' and ') from numbers in the document.
+    Clean and normalize numbers in the document:
+    1. Remove apostrophes (both ' and ' and ') from numbers
+    2. Fix malformed numbers like 1480.0.00 (double dots) -> 1480.00
+
     This preprocesses the document to avoid issues with Swiss number formatting.
     Example: 1'500.00 CHF -> 1500.00 CHF
+    Example: 1'480'000.00 CHF -> 1480000.00 CHF
+    Example: 1150.0.00 EUR -> 1150.00 EUR
     """
     apostrophes_removed = 0
+    malformed_fixed = 0
+
+    def clean_number_text(text):
+        """Clean a single text string"""
+        nonlocal apostrophes_removed, malformed_fixed
+
+        original = text
+
+        # Step 1: Remove ALL apostrophes from numbers (handles multiple apostrophes)
+        # Pattern: digit + apostrophe(s) + digit
+        # This handles: ', ', ', `, ʼ, etc.
+        while re.search(r"(\d)['\u2019\u0027\u02BC\u2018](\d)", text):
+            text = re.sub(r"(\d)['\u2019\u0027\u02BC\u2018](\d)", r'\1\2', text)
+
+        # Step 2: Fix malformed decimals like "1150.0.00" or "1480.0.00"
+        # Pattern: digit + ".0." + digits (should be just ".digits")
+        text = re.sub(r'(\d)\.0\.(\d{2})\b', r'\1.\2', text)
+
+        # Step 3: Fix triple dots or more: "1150...00" -> "1150.00"
+        text = re.sub(r'(\d)\.{2,}(\d{2})\b', r'\1.\2', text)
+
+        if text != original:
+            if re.search(r"['\u2019\u0027\u02BC\u2018]", original):
+                apostrophes_removed += 1
+            if re.search(r'\.0\.\d{2}|\.{2,}', original):
+                malformed_fixed += 1
+
+        return text
 
     # Process all paragraphs
     for paragraph in doc.paragraphs:
         for run in paragraph.runs:
-            original_text = run.text
-            # Replace curly apostrophe (U+2019) and regular apostrophe in numbers
-            # Pattern: digit + apostrophe + digit
-            cleaned_text = re.sub(r"(\d)['\u2019](\d)", r'\1\2', original_text)
-            if cleaned_text != original_text:
-                run.text = cleaned_text
-                apostrophes_removed += 1
+            run.text = clean_number_text(run.text)
 
     # Process all tables
     for table in doc.tables:
@@ -1234,14 +1271,12 @@ def clean_apostrophes_in_numbers(doc):
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
                     for run in paragraph.runs:
-                        original_text = run.text
-                        cleaned_text = re.sub(r"(\d)['\u2019](\d)", r'\1\2', original_text)
-                        if cleaned_text != original_text:
-                            run.text = cleaned_text
-                            apostrophes_removed += 1
+                        run.text = clean_number_text(run.text)
 
     if apostrophes_removed > 0:
-        print(f"✅ Preprocessed document: removed apostrophes from {apostrophes_removed} number(s)")
+        print(f"✅ Preprocessed: removed apostrophes from {apostrophes_removed} number(s)")
+    if malformed_fixed > 0:
+        print(f"✅ Preprocessed: fixed {malformed_fixed} malformed number(s) (e.g., 1150.0.00 → 1150.00)")
 
     return doc
 

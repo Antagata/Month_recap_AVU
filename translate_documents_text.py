@@ -31,8 +31,8 @@ LANGUAGES = {
     'RU': 'Russian'
 }
 
-# DeepL API endpoint for text translation
-DEEPL_API_URL = "https://api-free.deepl.com/v2/translate"
+# DeepL API endpoint for text translation (paid API, not free)
+DEEPL_API_URL = "https://api.deepl.com/v2/translate"
 
 
 def translate_text(text, target_lang):

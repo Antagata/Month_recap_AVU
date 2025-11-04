@@ -29,8 +29,8 @@ LANGUAGES = {
     'RU': 'Russian'
 }
 
-# DeepL API endpoint
-DEEPL_API_URL = "https://api-free.deepl.com/v2"
+# DeepL API endpoint (paid API, not free)
+DEEPL_API_URL = "https://api.deepl.com/v2"
 
 
 def upload_document(file_path, target_lang):
