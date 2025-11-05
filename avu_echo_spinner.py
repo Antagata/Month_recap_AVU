@@ -354,12 +354,14 @@ class AVUEchoSpinner(tk.Tk):
                 self.results_text.insert(tk.END, "Running CHF → EUR Converter...\n\n")
                 self.results_text.update()
 
-                # Run the converter
+                # Run the converter with explicit UTF-8 encoding
                 result = subprocess.run(
                     [sys.executable, "word_converter_improved.py"],
                     cwd=Path(__file__).parent,
                     capture_output=True,
                     text=True,
+                    encoding='utf-8',
+                    errors='replace',  # Replace invalid characters instead of crashing
                     timeout=120
                 )
 
@@ -395,12 +397,14 @@ class AVUEchoSpinner(tk.Tk):
                 self.results_text.insert(tk.END, "Running Wine Item Matcher...\n\n")
                 self.results_text.update()
 
-                # Run the matcher
+                # Run the matcher with explicit UTF-8 encoding
                 result = subprocess.run(
                     [sys.executable, "wine_item_matcher.py"],
                     cwd=Path(__file__).parent,
                     capture_output=True,
                     text=True,
+                    encoding='utf-8',
+                    errors='replace',
                     timeout=60
                 )
 
@@ -437,12 +441,14 @@ class AVUEchoSpinner(tk.Tk):
                 self.results_text.insert(tk.END, "Applying Corrections...\n\n")
                 self.results_text.update()
 
-                # Run apply corrections
+                # Run apply corrections with explicit UTF-8 encoding
                 result = subprocess.run(
                     [sys.executable, "apply_corrections.py"],
                     cwd=Path(__file__).parent,
                     capture_output=True,
                     text=True,
+                    encoding='utf-8',
+                    errors='replace',
                     timeout=30
                 )
 
