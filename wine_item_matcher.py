@@ -151,6 +151,50 @@ def parse_input_file(file_path):
     return wines
 
 
+def load_learning_database(learning_db_path):
+    """
+    Load the learning database for quick lookups.
+    Returns a dict: {(wine_name, vintage): item_no}
+    """
+    learning_map = {}
+
+    if not Path(learning_db_path).exists():
+        return learning_map
+
+    try:
+        with open(learning_db_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    # Parse: Wine Name | Vintage | Item No. | Timestamp
+                    parts = line.split(' | ')
+                    if len(parts) >= 3:
+                        wine_name = parts[0].strip()
+                        vintage_str = parts[1].strip()
+                        item_no_str = parts[2].strip()
+
+                        # Only add entries with valid Item Numbers (not NOT_FOUND)
+                        if item_no_str and item_no_str != 'NOT_FOUND':
+                            try:
+                                item_no = int(item_no_str)
+                                # Convert vintage to int or None
+                                vintage = int(vintage_str) if vintage_str != 'N/A' else None
+                                # Create lookup key
+                                key = (wine_name.lower(), vintage)
+                                learning_map[key] = item_no
+                            except ValueError:
+                                # Skip invalid entries
+                                pass
+
+        if learning_map:
+            print(f"✅ Loaded {len(learning_map)} entries from learning database")
+
+    except Exception as e:
+        print(f"⚠️  Warning: Could not read learning database: {e}")
+
+    return learning_map
+
+
 def load_excel_database(excel_path):
     """Load wine database from Excel"""
     try:
@@ -172,13 +216,43 @@ def load_excel_database(excel_path):
         return None
 
 
-def find_best_match(wine_name, vintage, df, threshold=0.6):
+def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None):
     """
-    Find best matching wine in Excel database.
+    Find best matching wine using learning database first, then Excel database.
+
+    Priority:
+    1. Learning database (exact match)
+    2. Excel database (fuzzy match)
 
     Returns:
         dict with match info, or None if no good match found
     """
+    # PRIORITY 1: Check learning database first (fast, exact matches from corrections)
+    if learning_map:
+        # Try exact match (case-insensitive)
+        key = (wine_name.lower(), vintage)
+        if key in learning_map:
+            item_no = learning_map[key]
+            # Look up full details from Excel
+            # Note: Item No. in Excel is stored as string, so convert to string for comparison
+            item_row = df[df[ITEM_NO_COL] == str(item_no)]
+            if len(item_row) > 0:
+                row = item_row.iloc[0]
+                return {
+                    'wine_name': str(row.get(WINE_NAME_COL, '')),
+                    'vintage': vintage,
+                    'item_no': item_no,
+                    'producer': str(row.get(PRODUCER_COL, '')),
+                    'size': row.get(SIZE_COL, ''),
+                    'similarity': 1.0,  # Perfect match from learning DB
+                    'source': 'learning_database'
+                }
+            else:
+                # Item Number from learning DB not found in Excel - invalid correction
+                # Fall through to fuzzy matching
+                print(f"      ⚠️  Learning DB has Item No. {item_no}, but it's not in Excel! Falling back to fuzzy matching...")
+
+    # PRIORITY 2: Fuzzy matching in Excel (slower, but comprehensive)
     candidates = []
 
     # Filter by vintage if provided
@@ -202,7 +276,8 @@ def find_best_match(wine_name, vintage, df, threshold=0.6):
                 'item_no': row.get(ITEM_NO_COL),
                 'producer': row.get(PRODUCER_COL, ''),
                 'size': row.get(SIZE_COL, ''),
-                'similarity': similarity
+                'similarity': similarity,
+                'source': 'excel_fuzzy'
             })
 
     if not candidates:
@@ -441,15 +516,20 @@ def main():
     print("Wine Item Number Matcher and Learning System")
     print("="*100 + "\n")
 
+    # Load learning database first
+    print("Step 1: Loading learning database...")
+    learning_map = load_learning_database(LEARNING_DB_FILE)
+    print()
+
     # Load Excel database
-    print("Step 1: Loading Excel database...")
+    print("Step 2: Loading Excel database...")
     df = load_excel_database(EXCEL_FILE)
     if df is None:
         return
     print()
 
     # Parse input file
-    print("Step 2: Parsing input file...")
+    print("Step 3: Parsing input file...")
     wines = parse_input_file(INPUT_FILE)
     if wines is None or len(wines) == 0:
         print("❌ No wines found in input file")
@@ -457,7 +537,7 @@ def main():
     print(f"✅ Found {len(wines)} wines to process\n")
 
     # Match wines
-    print("Step 3: Matching wines against database...")
+    print("Step 4: Matching wines against database...")
     print("-"*100)
 
     wine_entries = []
@@ -470,8 +550,8 @@ def main():
         print(f"\n🔍 Processing: {original_text}")
         print(f"   Wine: {wine_name} | Vintage: {vintage if vintage else 'N/A'}")
 
-        # Find best match
-        match = find_best_match(wine_name, vintage, df)
+        # Find best match (checks learning database first, then Excel)
+        match = find_best_match(wine_name, vintage, df, learning_map=learning_map)
 
         entry = {
             'original_text': original_text,
@@ -480,7 +560,9 @@ def main():
         }
 
         if match:
-            print(f"   ✅ MATCHED: Item No. {match['item_no']}")
+            # Show source of match
+            source_label = "📚 Learning DB" if match.get('source') == 'learning_database' else "Excel"
+            print(f"   ✅ MATCHED: Item No. {match['item_no']} ({source_label})")
             print(f"      Excel: {match['wine_name']} {match['vintage']}")
             print(f"      Similarity: {match['similarity']:.1%}")
 
@@ -499,15 +581,15 @@ def main():
     print("\n" + "="*100)
 
     # Generate output report
-    print("\nStep 4: Generating results report...")
+    print("\nStep 5: Generating results report...")
     generate_output_report(wine_entries, OUTPUT_DIR)
 
     # Update learning database
-    print("\nStep 5: Updating learning database...")
+    print("\nStep 6: Updating learning database...")
     update_learning_database(wine_entries, LEARNING_DB_FILE)
 
     # Create correction file for wines needing review
-    print("\nStep 6: Checking for wines needing correction...")
+    print("\nStep 7: Checking for wines needing correction...")
     correction_file = create_correction_file(wine_entries, OUTPUT_DIR)
 
     print("\n" + "="*100)

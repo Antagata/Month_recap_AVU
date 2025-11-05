@@ -44,5 +44,8 @@ Larrivet Haut Brion Rouge | 2018 | 65368 | 2025-11-05 09:50:54
 Bòggina A from Fattoria Petrolo | 2023 | 65653 | 2025-11-05 09:50:54
 Gran Reserva 904 from Rioja Alta | 2011 | 51783 | 2025-11-05 09:50:54
 Edition Takashi Murakami Dom Pérignon | 2015 | NOT_FOUND | 2025-11-05 10:25:13
-IX Estate - Colgin Cellars | 2022 | 63242 | 2025-11-05 10:31:33 (manual correction)
-Edition Takashi Murakami Dom Pérignon | 2015 | 65703 | 2025-11-05 10:31:33 (manual correction)
+IX Estate - Colgin Cellars | 2022 | NOT_FOUND | 2025-11-05 10:58:15 (invalid Item No. 63242 removed)
+Edition Takashi Murakami Dom Pérignon | 2015 | NOT_FOUND | 2025-11-05 10:58:15 (invalid Item No. 65703 removed)
+The Flight | 2019 | 61379 | 2025-11-05 10:35:43
+IX Estate - Colgin Cellars | 2022 | 63242 | 2025-11-05 11:15:28 (manual correction)
+Edition Takashi Murakami Dom Pérignon | 2015 | 65703 | 2025-11-05 11:15:28 (manual correction)
