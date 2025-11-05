@@ -10,13 +10,19 @@ This script:
 4. Updates a learning database to improve future wine name recognition
 
 Usage:
-    python wine_item_matcher.py
+    python wine_item_matcher.py [--input FILE] [--size SIZE]
+
+Arguments:
+    --input FILE    Input file with wine names (default: ItemNoGenerator.txt)
+    --size SIZE     Filter by bottle size (default: 75.0 for standard bottles)
+                    Options: 75.0, 150.0, 300.0, or omit for all sizes
 """
 
 import pandas as pd
 import sys
 import io
 import re
+import argparse
 from datetime import datetime
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -257,7 +263,7 @@ def load_stock_database(stock_path):
         return None
 
 
-def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None, stock_df=None):
+def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None, stock_df=None, preferred_size=75.0):
     """
     Find best matching wine using learning database first, then Excel database, then stock database.
 
@@ -265,6 +271,10 @@ def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None, st
     1. Learning database (exact match)
     2. Primary Excel database (fuzzy match)
     3. Stock database fallback (fuzzy match) - only if not found in primary
+
+    Args:
+        preferred_size: Preferred bottle size (default 75.0 for standard bottles)
+                       Set to None to disable size filtering
 
     Returns:
         dict with match info, or None if no good match found
@@ -280,15 +290,20 @@ def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None, st
             item_row = df[df[ITEM_NO_COL] == str(item_no)]
             if len(item_row) > 0:
                 row = item_row.iloc[0]
-                return {
-                    'wine_name': str(row.get(WINE_NAME_COL, '')),
-                    'vintage': vintage,
-                    'item_no': item_no,
-                    'producer': str(row.get(PRODUCER_COL, '')),
-                    'size': row.get(SIZE_COL, ''),
-                    'similarity': 1.0,  # Perfect match from learning DB
-                    'source': 'learning_database'
-                }
+                # Check if size matches the preferred size filter
+                row_size = row.get(SIZE_COL, '')
+                if preferred_size is None or row_size == preferred_size:
+                    return {
+                        'wine_name': str(row.get(WINE_NAME_COL, '')),
+                        'vintage': vintage,
+                        'item_no': item_no,
+                        'producer': str(row.get(PRODUCER_COL, '')),
+                        'size': row_size,
+                        'similarity': 1.0,  # Perfect match from learning DB
+                        'source': 'learning_database'
+                    }
+                else:
+                    print(f"      ⚠️  Learning DB has Item No. {item_no} (size: {row_size}cl), but size filter is {preferred_size}cl. Searching for correct size...")
             else:
                 # Item Number from learning DB not found in primary Excel
                 # Check stock database before falling back to fuzzy matching
@@ -296,15 +311,20 @@ def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None, st
                     stock_row = stock_df[stock_df['Item_No'] == item_no]
                     if len(stock_row) > 0:
                         row = stock_row.iloc[0]
-                        return {
-                            'wine_name': str(row.get('Wine_Name', '')),
-                            'vintage': vintage,
-                            'item_no': item_no,
-                            'producer': str(row.get('Producer', '')),
-                            'size': row.get('Size', ''),
-                            'similarity': 1.0,  # Perfect match from learning DB
-                            'source': 'learning_database_stock'
-                        }
+                        row_size = row.get('Size', '')
+                        # Check if size matches the preferred size filter
+                        if preferred_size is None or row_size == preferred_size:
+                            return {
+                                'wine_name': str(row.get('Wine_Name', '')),
+                                'vintage': vintage,
+                                'item_no': item_no,
+                                'producer': str(row.get('Producer', '')),
+                                'size': row_size,
+                                'similarity': 1.0,  # Perfect match from learning DB
+                                'source': 'learning_database_stock'
+                            }
+                        else:
+                            print(f"      ⚠️  Learning DB has Item No. {item_no} (size: {row_size}cl), but size filter is {preferred_size}cl. Searching for correct size...")
                 print(f"      ⚠️  Learning DB has Item No. {item_no}, but it's not in either database! Falling back to fuzzy matching...")
 
     # PRIORITY 2: Fuzzy matching in primary Excel (slower, but comprehensive)
@@ -315,6 +335,10 @@ def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None, st
         df_filtered = df[df['Vintage_Int'] == vintage].copy()
     else:
         df_filtered = df.copy()
+
+    # Filter by size if preferred_size is specified
+    if preferred_size is not None and len(df_filtered) > 0:
+        df_filtered = df_filtered[df_filtered[SIZE_COL] == preferred_size].copy()
 
     if len(df_filtered) > 0:
         # Calculate similarity for each wine
@@ -347,6 +371,10 @@ def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None, st
             stock_filtered = stock_df[stock_df['Vintage_Int'] == vintage].copy()
         else:
             stock_filtered = stock_df.copy()
+
+        # Filter by size if preferred_size is specified
+        if preferred_size is not None and len(stock_filtered) > 0:
+            stock_filtered = stock_filtered[stock_filtered['Size'] == preferred_size].copy()
 
         if len(stock_filtered) > 0:
             # Calculate similarity for each wine
@@ -598,9 +626,24 @@ def generate_output_report(wine_entries, output_dir):
 
 def main():
     """Main execution function"""
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Wine Item Number Matcher')
+    parser.add_argument('--input', type=str, default=INPUT_FILE,
+                       help='Input file with wine names')
+    parser.add_argument('--size', type=float, default=75.0,
+                       help='Preferred bottle size (75.0, 150.0, 300.0). Omit for all sizes.')
+    args = parser.parse_args()
+
+    input_file = args.input
+    preferred_size = args.size
+
     print("="*100)
     print("Wine Item Number Matcher and Learning System")
     print("="*100 + "\n")
+
+    # Show configuration
+    print(f"📝 Input file: {input_file}")
+    print(f"🍾 Bottle size filter: {preferred_size}cl (standard bottle)\n")
 
     # Load learning database first
     print("Step 1: Loading learning database...")
@@ -621,7 +664,7 @@ def main():
 
     # Parse input file
     print("Step 4: Parsing input file...")
-    wines = parse_input_file(INPUT_FILE)
+    wines = parse_input_file(input_file)
     if wines is None or len(wines) == 0:
         print("❌ No wines found in input file")
         return
@@ -642,7 +685,8 @@ def main():
         print(f"   Wine: {wine_name} | Vintage: {vintage if vintage else 'N/A'}")
 
         # Find best match (checks learning database first, then primary Excel, then stock)
-        match = find_best_match(wine_name, vintage, df, learning_map=learning_map, stock_df=stock_df)
+        match = find_best_match(wine_name, vintage, df, learning_map=learning_map,
+                               stock_df=stock_df, preferred_size=preferred_size)
 
         entry = {
             'original_text': original_text,
@@ -679,6 +723,23 @@ def main():
         wine_entries.append(entry)
 
     print("\n" + "="*100)
+    print("\nRESULTS TABLE")
+    print("-"*100)
+    print(f"{'Wine Name':<40} {'Vintage':<10} {'Item No.':<12} {'Similarity':<12} {'Status'}")
+    print("-"*100)
+
+    for entry in wine_entries:
+        wine_name = entry.get('wine_name', '')[:38]
+        vintage = str(entry.get('vintage', 'N/A'))
+        item_no = str(entry.get('matched_item_no', ''))
+        similarity = entry.get('similarity', 0.0)
+        status = '✅ MATCHED' if item_no else '❌ NOT FOUND'
+
+        similarity_str = f"{similarity:.1%}" if similarity > 0 else "N/A"
+
+        print(f"{wine_name:<40} {vintage:<10} {item_no:<12} {similarity_str:<12} {status}")
+
+    print("="*100)
 
     # Generate output report
     print("\nStep 6: Generating results report...")

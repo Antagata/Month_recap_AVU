@@ -155,13 +155,13 @@ class AVUEchoSpinner(tk.Tk):
         )
         matcher_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
-        # Wine list input
+        # Wine list file input (original single-line)
         wine_input_frame = tk.Frame(matcher_frame, bg="#1a1a1a")
         wine_input_frame.pack(fill=tk.X, padx=10, pady=5)
 
         tk.Label(
             wine_input_frame,
-            text="Wine List:",
+            text="Wine List File:",
             font=("Arial", 10),
             fg="#ffffff",
             bg="#1a1a1a",
@@ -210,6 +210,71 @@ class AVUEchoSpinner(tk.Tk):
             cursor="hand2"
         )
         edit_wine_btn.pack(side=tk.LEFT, padx=2)
+
+        # Direct wine input (multi-line text area)
+        direct_input_frame = tk.Frame(matcher_frame, bg="#1a1a1a")
+        direct_input_frame.pack(fill=tk.BOTH, padx=10, pady=5)
+
+        tk.Label(
+            direct_input_frame,
+            text="Or Enter Directly:",
+            font=("Arial", 10),
+            fg="#ffff00",
+            bg="#1a1a1a"
+        ).pack(anchor="w")
+
+        tk.Label(
+            direct_input_frame,
+            text="(Format: Wine Name | Vintage, one per line)",
+            font=("Arial", 8),
+            fg="#888888",
+            bg="#1a1a1a"
+        ).pack(anchor="w")
+
+        self.direct_wine_text = scrolledtext.ScrolledText(
+            direct_input_frame,
+            height=4,
+            font=("Consolas", 9),
+            bg="#2d2d2d",
+            fg="#00ff00",
+            insertbackground="#00ff00",
+            relief=tk.FLAT,
+            bd=2
+        )
+        self.direct_wine_text.pack(fill=tk.BOTH, expand=True, pady=5)
+
+        # Size filter
+        size_frame = tk.Frame(matcher_frame, bg="#1a1a1a")
+        size_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        tk.Label(
+            size_frame,
+            text="Bottle Size:",
+            font=("Arial", 10),
+            fg="#ffffff",
+            bg="#1a1a1a",
+            width=15,
+            anchor="w"
+        ).pack(side=tk.LEFT)
+
+        self.size_filter = tk.StringVar(value="75.0")
+        size_dropdown = ttk.Combobox(
+            size_frame,
+            textvariable=self.size_filter,
+            values=["75.0", "150.0", "300.0", "All sizes"],
+            state="readonly",
+            font=("Arial", 9),
+            width=15
+        )
+        size_dropdown.pack(side=tk.LEFT, padx=5)
+
+        tk.Label(
+            size_frame,
+            text="(Default: 75cl - standard bottle)",
+            font=("Arial", 8),
+            fg="#888888",
+            bg="#1a1a1a"
+        ).pack(side=tk.LEFT, padx=5)
 
         # Control buttons
         control_frame = tk.Frame(matcher_frame, bg="#1a1a1a")
@@ -397,9 +462,43 @@ class AVUEchoSpinner(tk.Tk):
                 self.results_text.insert(tk.END, "Running Wine Item Matcher...\n\n")
                 self.results_text.update()
 
+                # Check if user entered wines directly
+                direct_input = self.direct_wine_text.get("1.0", tk.END).strip()
+
+                # Get size filter
+                size_filter = self.size_filter.get()
+
+                # Prepare command
+                cmd = [sys.executable, "wine_item_matcher.py"]
+
+                # Add size parameter
+                if size_filter != "All sizes":
+                    cmd.extend(["--size", size_filter])
+
+                # If direct input provided, create temporary file
+                temp_input_file = None
+                if direct_input:
+                    self.results_text.insert(tk.END, f"Using direct input with {len(direct_input.splitlines())} wines\n")
+                    self.results_text.insert(tk.END, f"Size filter: {size_filter}\n\n")
+
+                    # Create temporary input file
+                    import tempfile
+                    temp_input_file = Path(tempfile.gettempdir()) / "avu_temp_wine_input.txt"
+                    with open(temp_input_file, 'w', encoding='utf-8') as f:
+                        f.write(direct_input)
+
+                    cmd.extend(["--input", str(temp_input_file)])
+                else:
+                    # Use file path
+                    wine_file = self.wine_list_path.get()
+                    if wine_file:
+                        cmd.extend(["--input", wine_file])
+                    self.results_text.insert(tk.END, f"Using wine list file: {Path(wine_file).name}\n")
+                    self.results_text.insert(tk.END, f"Size filter: {size_filter}\n\n")
+
                 # Run the matcher with explicit UTF-8 encoding
                 result = subprocess.run(
-                    [sys.executable, "wine_item_matcher.py"],
+                    cmd,
                     cwd=Path(__file__).parent,
                     capture_output=True,
                     text=True,
@@ -407,6 +506,10 @@ class AVUEchoSpinner(tk.Tk):
                     errors='replace',
                     timeout=60
                 )
+
+                # Clean up temp file
+                if temp_input_file and temp_input_file.exists():
+                    temp_input_file.unlink()
 
                 output = result.stdout + result.stderr
                 self.results_text.insert(tk.END, output)
