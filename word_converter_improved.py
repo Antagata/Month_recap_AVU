@@ -386,10 +386,14 @@ def load_data_and_document():
             # Build item_number_map for bulletproof matching
             # Item No. is unique per wine+vintage+size (same for qty=0 and qty=36)
             if pd.notna(item_no):
-                item_key = int(item_no)
-                if item_key not in item_number_map:
-                    item_number_map[item_key] = []
-                item_number_map[item_key].append(wine_data)
+                try:
+                    item_key = int(float(item_no))  # Handle both int and float strings
+                    if item_key not in item_number_map:
+                        item_number_map[item_key] = []
+                    item_number_map[item_key].append(wine_data)
+                except (ValueError, TypeError):
+                    # Skip non-numeric Item Numbers (e.g., "ACCESSORIES")
+                    pass
 
         # For non-duplicate prices, create simple conversion map
         for chf, eur_set in chf_eur_mapping.items():
@@ -470,7 +474,11 @@ def find_best_wine_match(chf_price, context_wine_name, wine_data_map, detected_q
         for option in wine_options:
             item_no = option.get('item_no')
             if pd.notna(item_no):
-                item_key = int(item_no)
+                try:
+                    item_key = int(float(item_no))  # Handle both int and float strings
+                except (ValueError, TypeError):
+                    # Skip non-numeric Item Numbers
+                    continue
                 if item_key in item_number_map:
                     # Get all entries for this Item No. (should be qty=0 and qty=36 variants)
                     item_entries = item_number_map[item_key]
@@ -1069,26 +1077,26 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
         for match in re.finditer(pattern1, text):
             all_replacements.append((match.start(), match.end(), f'{eur_value} EUR'))
 
-        # Pattern 2: CHF + Number (no decimals, with or without apostrophe)
-        # Matches: "CHF 1150", "CHF 1'150", "CHF 1'150" (U+2019 curly quote)
+        # Pattern 2: CHF + Number (with or without decimals, with or without apostrophe)
+        # Matches: "CHF 1150", "CHF 1150.00", "CHF 1'150", "CHF 1'150.00" (U+2019 curly quote)
         if len(chf_int) == 4:
-            pattern2 = r"[Cc][Hh][Ff]\s+" + chf_int[0] + r"['\u2019]?" + chf_int[1:] + r"(?!\d)"
+            pattern2 = r"[Cc][Hh][Ff]\s+" + chf_int[0] + r"['\u2019]?" + chf_int[1:] + r"(?:\.00)?(?!\d)"
         elif len(chf_int) == 5:
-            pattern2 = r"[Cc][Hh][Ff]\s+" + chf_int[:2] + r"['\u2019]?" + chf_int[2:] + r"(?!\d)"
+            pattern2 = r"[Cc][Hh][Ff]\s+" + chf_int[:2] + r"['\u2019]?" + chf_int[2:] + r"(?:\.00)?(?!\d)"
         else:
-            pattern2 = r"[Cc][Hh][Ff]\s+" + re.escape(chf_int) + r"(?!\d)"
+            pattern2 = r"[Cc][Hh][Ff]\s+" + re.escape(chf_int) + r"(?:\.00)?(?!\d)"
 
         for match in re.finditer(pattern2, text):
             all_replacements.append((match.start(), match.end(), f'EUR {eur_value}'))
 
-        # Pattern 3: Number + CHF (no decimals, with or without apostrophe)
-        # Matches: "1150 CHF", "1'150 CHF", "1'150 CHF" (U+2019 curly quote), "190 CHF"
+        # Pattern 3: Number + CHF (with or without decimals, with or without apostrophe)
+        # Matches: "1150 CHF", "1150.00 CHF", "1'150 CHF", "1'150.00 CHF" (U+2019 curly quote), "190 CHF"
         if len(chf_int) == 4:
-            pattern3 = chf_int[0] + r"['\u2019]?" + chf_int[1:] + r"\s+[Cc][Hh][Ff]"
+            pattern3 = chf_int[0] + r"['\u2019]?" + chf_int[1:] + r"(?:\.00)?\s+[Cc][Hh][Ff]"
         elif len(chf_int) == 5:
-            pattern3 = chf_int[:2] + r"['\u2019]?" + chf_int[2:] + r"\s+[Cc][Hh][Ff]"
+            pattern3 = chf_int[:2] + r"['\u2019]?" + chf_int[2:] + r"(?:\.00)?\s+[Cc][Hh][Ff]"
         else:
-            pattern3 = re.escape(chf_int) + r"\s+[Cc][Hh][Ff]"
+            pattern3 = re.escape(chf_int) + r"(?:\.00)?\s+[Cc][Hh][Ff]"
 
         for match in re.finditer(pattern3, text):
             all_replacements.append((match.start(), match.end(), f'{eur_value} EUR'))
