@@ -57,6 +57,27 @@ Pavie | 2021 | NOT_FOUND | 2025-11-04 19:45:55
 - ✅ Never deletes old entries
 - ✅ Tracks when each wine was processed
 - ✅ Records both successful matches AND failures
+- ✅ Prevents duplicates (same wine+vintage+item_no only stored once)
+
+#### C. Corrections File (`CORRECTIONS_NEEDED_[timestamp].txt`) - When Needed
+Auto-created when wines are NOT FOUND or have low similarity (< 80%):
+
+```
+====================================================================================================
+WINE CORRECTIONS FILE
+====================================================================================================
+
+[1] Some Rare Wine 2020
+Some Rare Wine | 2020 | YOUR_ITEM_NO_HERE | NOT FOUND - Please add correct Item No.
+
+[2] Lafite 2005
+Lafite | 2005 | 7046 | LOW SIMILARITY (70.0%) - Matched to 'Lafite Rothschild' - Verify if correct
+```
+
+**To apply corrections:**
+1. Edit the file and replace `YOUR_ITEM_NO_HERE` with actual Item Numbers
+2. Run: `python apply_corrections.py` (auto-detects latest file)
+3. Corrected wines are added to learning database with "(manual correction)" tag
 
 ---
 

@@ -32,3 +32,17 @@ Pavie | 2021 | 55416 | 2025-11-04 20:14:12
 Grange | 2019 | 59604 | 2025-11-04 20:14:12
 Some Random Wine That Doesn't Exist | 2025 | NOT_FOUND | 2025-11-04 20:22:05
 Some Random Wine That Doesn't Exist | 2025 | 99999 | 2025-11-04 20:22:33 (manual correction)
+Palmer Historical XIX L.20.21 | N/A | 60084 | 2025-11-05 09:50:54
+Hommage à Jacques Perrin | 2021 | 65813 | 2025-11-05 09:50:54
+Clos l'Église | 2009 | 65423 | 2025-11-05 09:50:54
+Château Lafleur | 2022 | 63011 | 2025-11-05 09:50:54
+Château L'Évangile | 2015 | 35730 | 2025-11-05 09:50:54
+Cabernet Sauvignon Harlan Estate | 2021 | 62805 | 2025-11-05 09:50:54
+IX Estate - Colgin Cellars | 2022 | NOT_FOUND | 2025-11-05 09:50:54
+Edition Takashi Murakami Dom Pérignon | 2005 | NOT_FOUND | 2025-11-05 09:50:54
+Larrivet Haut Brion Rouge | 2018 | 65368 | 2025-11-05 09:50:54
+Bòggina A from Fattoria Petrolo | 2023 | 65653 | 2025-11-05 09:50:54
+Gran Reserva 904 from Rioja Alta | 2011 | 51783 | 2025-11-05 09:50:54
+Edition Takashi Murakami Dom Pérignon | 2015 | NOT_FOUND | 2025-11-05 10:25:13
+IX Estate - Colgin Cellars | 2022 | 63242 | 2025-11-05 10:31:33 (manual correction)
+Edition Takashi Murakami Dom Pérignon | 2015 | 65703 | 2025-11-05 10:31:33 (manual correction)

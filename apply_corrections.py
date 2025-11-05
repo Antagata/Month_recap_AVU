@@ -7,7 +7,14 @@ This script reads a corrections file created by wine_item_matcher.py
 and applies the manual corrections to the learning database.
 
 Usage:
-    python apply_corrections.py CORRECTIONS_[timestamp].txt
+    # Auto-detect latest corrections file (recommended):
+    python apply_corrections.py
+
+    # Or specify a specific file:
+    python apply_corrections.py CORRECTIONS_NEEDED_20251104_195500.txt
+
+The script will automatically find and use the most recent CORRECTIONS_NEEDED_*.txt
+file if no filename is provided as an argument.
 """
 
 import sys
@@ -155,22 +162,55 @@ def apply_corrections_to_learning_db(corrections, learning_db_path):
     return True
 
 
+def find_latest_corrections_file(directory="."):
+    """
+    Find the most recent CORRECTIONS_NEEDED_*.txt file in the directory.
+
+    Returns:
+        Path to the latest corrections file, or None if not found
+    """
+    import glob
+    import os
+
+    # Find all corrections files
+    pattern = str(Path(directory) / "CORRECTIONS_NEEDED_*.txt")
+    corrections_files = glob.glob(pattern)
+
+    if not corrections_files:
+        return None
+
+    # Sort by modification time (most recent first)
+    corrections_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+
+    return corrections_files[0]
+
+
 def main():
     """Main execution function"""
     print("="*100)
     print("Apply Manual Corrections to Learning Database")
     print("="*100 + "\n")
 
-    # Check command line arguments
-    if len(sys.argv) < 2:
-        print("❌ Error: No corrections file specified")
-        print("\nUsage:")
-        print("    python apply_corrections.py CORRECTIONS_[timestamp].txt")
-        print("\nExample:")
-        print("    python apply_corrections.py CORRECTIONS_NEEDED_20251104_195500.txt")
-        return
+    # Check if a specific file was provided as argument
+    if len(sys.argv) >= 2:
+        corrections_file = sys.argv[1]
+        print(f"📄 Using specified file: {corrections_file}")
+    else:
+        # Auto-detect latest corrections file
+        print("🔍 Searching for latest corrections file...")
+        corrections_file = find_latest_corrections_file()
 
-    corrections_file = sys.argv[1]
+        if corrections_file is None:
+            print("❌ Error: No corrections files found")
+            print("\nLooking for files matching: CORRECTIONS_NEEDED_*.txt")
+            print("\nPlease either:")
+            print("  1. Run wine_item_matcher.py first to generate a corrections file")
+            print("  2. Specify a corrections file manually:")
+            print("     python apply_corrections.py CORRECTIONS_NEEDED_20251104_195500.txt")
+            return
+
+        print(f"✅ Found latest corrections file: {Path(corrections_file).name}")
+        print(f"   Modified: {datetime.fromtimestamp(Path(corrections_file).stat().st_mtime).strftime('%Y-%m-%d %H:%M:%S')}")
 
     # Check if file exists
     if not Path(corrections_file).exists():
