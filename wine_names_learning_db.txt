@@ -66,3 +66,4 @@ Frédéric Savart Le Mesnil sur Oger Grand Cru | 2022 | 65596 | 2025-11-05 14:45
 Bolgheri Rosso _ Le Macchiole | 2023 | 63268 | 2025-11-05 14:45:58 (manual correction)
 Bolgheri Rosso Le Macchiole | 2023 | NOT_FOUND | 2025-11-05 14:46:42
 Bolgheri Rosso Le Macchiole | 2023 | 63268 | 2025-11-05 15:05:59
+Yjar | 2021 | 65509 | 2025-11-05 15:12:36

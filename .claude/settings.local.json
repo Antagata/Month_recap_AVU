@@ -5,7 +5,10 @@
       "Bash(git reset:*)",
       "Bash(.gitignore)",
       "Bash(git push:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(del translate_documents.py translate_documents_text.py)",
+      "Bash(taskkill:*)",
+      "Bash(if exist \"month recap_EUR.docx\" del \"month recap_EUR.docx\")"
     ],
     "deny": [],
     "ask": []
