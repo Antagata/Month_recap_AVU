@@ -26,16 +26,24 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Configuration
 EXCEL_FILE = r"C:\Users\Marco.Africani\Desktop\Month recap\Conversion_month.xlsx"
+STOCK_FILE = r"C:\Users\Marco.Africani\Desktop\Month recap\Detailed Stock List.xlsx"  # Fallback database
 INPUT_FILE = r"C:\Users\Marco.Africani\Desktop\Month recap\ItemNoGenerator.txt"
 OUTPUT_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
 LEARNING_DB_FILE = r"C:\Users\Marco.Africani\Desktop\Month recap\wine_names_learning_db.txt"
 
-# Excel columns
+# Excel columns - Conversion_month.xlsx
 WINE_NAME_COL = 'Wine Name'
 VINTAGE_COL = 'Vintage'
 ITEM_NO_COL = 'Item No.'
 PRODUCER_COL = 'Producer Name'
 SIZE_COL = 'Size'
+
+# Stock database columns - Detailed Stock List.xlsx
+STOCK_ID_COL = 'ID'
+STOCK_WINE_COL = 'Wine'
+STOCK_PRODUCER_COL = 'Producer'
+STOCK_VINTAGE_COL = 'Vintage'
+STOCK_SIZE_COL = 'Size'
 
 
 def normalize_wine_name(name):
@@ -205,7 +213,7 @@ def load_excel_database(excel_path):
             lambda x: int(x) if pd.notna(x) and str(x).isdigit() else None
         )
 
-        print(f"✅ Loaded {len(df)} wines from Excel database")
+        print(f"✅ Loaded {len(df)} wines from primary database (Conversion_month.xlsx)")
         return df
 
     except FileNotFoundError:
@@ -216,13 +224,47 @@ def load_excel_database(excel_path):
         return None
 
 
-def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None):
+def load_stock_database(stock_path):
+    """Load fallback wine stock database from Detailed Stock List.xlsx"""
+    try:
+        # Skip first 2 rows, header is on row 3 (0-indexed: skiprows=[0,1])
+        df = pd.read_excel(stock_path, header=2)
+
+        # Rename columns for consistency
+        df = df.rename(columns={
+            STOCK_ID_COL: 'Item_No',
+            STOCK_WINE_COL: 'Wine_Name',
+            STOCK_PRODUCER_COL: 'Producer',
+            STOCK_VINTAGE_COL: 'Vintage',
+            STOCK_SIZE_COL: 'Size'
+        })
+
+        # Convert vintage to int for matching
+        df['Vintage_Int'] = df['Vintage'].apply(
+            lambda x: int(x) if pd.notna(x) and str(x).replace('.0', '').isdigit() else None
+        )
+
+        print(f"✅ Loaded {len(df)} wines from fallback database (Detailed Stock List.xlsx)")
+        return df
+
+    except FileNotFoundError:
+        print(f"⚠️  Warning: Stock database not found at {stock_path}")
+        print(f"   Fallback matching will not be available")
+        return None
+    except Exception as e:
+        print(f"⚠️  Warning: Could not load stock database: {e}")
+        print(f"   Fallback matching will not be available")
+        return None
+
+
+def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None, stock_df=None):
     """
-    Find best matching wine using learning database first, then Excel database.
+    Find best matching wine using learning database first, then Excel database, then stock database.
 
     Priority:
     1. Learning database (exact match)
-    2. Excel database (fuzzy match)
+    2. Primary Excel database (fuzzy match)
+    3. Stock database fallback (fuzzy match) - only if not found in primary
 
     Returns:
         dict with match info, or None if no good match found
@@ -248,11 +290,24 @@ def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None):
                     'source': 'learning_database'
                 }
             else:
-                # Item Number from learning DB not found in Excel - invalid correction
-                # Fall through to fuzzy matching
-                print(f"      ⚠️  Learning DB has Item No. {item_no}, but it's not in Excel! Falling back to fuzzy matching...")
+                # Item Number from learning DB not found in primary Excel
+                # Check stock database before falling back to fuzzy matching
+                if stock_df is not None:
+                    stock_row = stock_df[stock_df['Item_No'] == item_no]
+                    if len(stock_row) > 0:
+                        row = stock_row.iloc[0]
+                        return {
+                            'wine_name': str(row.get('Wine_Name', '')),
+                            'vintage': vintage,
+                            'item_no': item_no,
+                            'producer': str(row.get('Producer', '')),
+                            'size': row.get('Size', ''),
+                            'similarity': 1.0,  # Perfect match from learning DB
+                            'source': 'learning_database_stock'
+                        }
+                print(f"      ⚠️  Learning DB has Item No. {item_no}, but it's not in either database! Falling back to fuzzy matching...")
 
-    # PRIORITY 2: Fuzzy matching in Excel (slower, but comprehensive)
+    # PRIORITY 2: Fuzzy matching in primary Excel (slower, but comprehensive)
     candidates = []
 
     # Filter by vintage if provided
@@ -261,31 +316,62 @@ def find_best_match(wine_name, vintage, df, threshold=0.6, learning_map=None):
     else:
         df_filtered = df.copy()
 
-    if len(df_filtered) == 0:
-        return None
+    if len(df_filtered) > 0:
+        # Calculate similarity for each wine
+        for _, row in df_filtered.iterrows():
+            excel_wine_name = str(row.get(WINE_NAME_COL, ''))
+            similarity = calculate_similarity(wine_name, excel_wine_name)
 
-    # Calculate similarity for each wine
-    for idx, row in df_filtered.iterrows():
-        excel_wine_name = str(row.get(WINE_NAME_COL, ''))
-        similarity = calculate_similarity(wine_name, excel_wine_name)
+            if similarity >= threshold:
+                candidates.append({
+                    'wine_name': excel_wine_name,
+                    'vintage': row.get('Vintage_Int'),
+                    'item_no': row.get(ITEM_NO_COL),
+                    'producer': row.get(PRODUCER_COL, ''),
+                    'size': row.get(SIZE_COL, ''),
+                    'similarity': similarity,
+                    'source': 'excel_primary'
+                })
 
-        if similarity >= threshold:
-            candidates.append({
-                'wine_name': excel_wine_name,
-                'vintage': row.get('Vintage_Int'),
-                'item_no': row.get(ITEM_NO_COL),
-                'producer': row.get(PRODUCER_COL, ''),
-                'size': row.get(SIZE_COL, ''),
-                'similarity': similarity,
-                'source': 'excel_fuzzy'
-            })
+    # If we found candidates in primary Excel, return best match
+    if candidates:
+        best_match = max(candidates, key=lambda x: x['similarity'])
+        return best_match
 
-    if not candidates:
-        return None
+    # PRIORITY 3: Fuzzy matching in stock database (fallback)
+    if stock_df is not None:
+        print(f"      🔄 Not found in primary database, trying fallback stock database...")
 
-    # Return best match (highest similarity)
-    best_match = max(candidates, key=lambda x: x['similarity'])
-    return best_match
+        # Filter by vintage if provided
+        if vintage:
+            stock_filtered = stock_df[stock_df['Vintage_Int'] == vintage].copy()
+        else:
+            stock_filtered = stock_df.copy()
+
+        if len(stock_filtered) > 0:
+            # Calculate similarity for each wine
+            for _, row in stock_filtered.iterrows():
+                stock_wine_name = str(row.get('Wine_Name', ''))
+                similarity = calculate_similarity(wine_name, stock_wine_name)
+
+                if similarity >= threshold:
+                    candidates.append({
+                        'wine_name': stock_wine_name,
+                        'vintage': row.get('Vintage_Int'),
+                        'item_no': row.get('Item_No'),
+                        'producer': row.get('Producer', ''),
+                        'size': row.get('Size', ''),
+                        'similarity': similarity,
+                        'source': 'stock_fallback'
+                    })
+
+        # Return best match from stock if found
+        if candidates:
+            best_match = max(candidates, key=lambda x: x['similarity'])
+            return best_match
+
+    # No match found in any database
+    return None
 
 
 def update_learning_database(wine_entries, learning_db_path):
@@ -521,15 +607,20 @@ def main():
     learning_map = load_learning_database(LEARNING_DB_FILE)
     print()
 
-    # Load Excel database
-    print("Step 2: Loading Excel database...")
+    # Load primary Excel database
+    print("Step 2: Loading primary database...")
     df = load_excel_database(EXCEL_FILE)
     if df is None:
         return
     print()
 
+    # Load fallback stock database
+    print("Step 3: Loading fallback stock database...")
+    stock_df = load_stock_database(STOCK_FILE)
+    print()
+
     # Parse input file
-    print("Step 3: Parsing input file...")
+    print("Step 4: Parsing input file...")
     wines = parse_input_file(INPUT_FILE)
     if wines is None or len(wines) == 0:
         print("❌ No wines found in input file")
@@ -537,7 +628,7 @@ def main():
     print(f"✅ Found {len(wines)} wines to process\n")
 
     # Match wines
-    print("Step 4: Matching wines against database...")
+    print("Step 5: Matching wines against databases...")
     print("-"*100)
 
     wine_entries = []
@@ -550,8 +641,8 @@ def main():
         print(f"\n🔍 Processing: {original_text}")
         print(f"   Wine: {wine_name} | Vintage: {vintage if vintage else 'N/A'}")
 
-        # Find best match (checks learning database first, then Excel)
-        match = find_best_match(wine_name, vintage, df, learning_map=learning_map)
+        # Find best match (checks learning database first, then primary Excel, then stock)
+        match = find_best_match(wine_name, vintage, df, learning_map=learning_map, stock_df=stock_df)
 
         entry = {
             'original_text': original_text,
@@ -560,10 +651,19 @@ def main():
         }
 
         if match:
-            # Show source of match
-            source_label = "📚 Learning DB" if match.get('source') == 'learning_database' else "Excel"
+            # Show source of match with appropriate emoji
+            source = match.get('source', '')
+            if source == 'learning_database':
+                source_label = "📚 Learning DB"
+            elif source == 'learning_database_stock':
+                source_label = "📚 Learning DB (Stock)"
+            elif source == 'stock_fallback':
+                source_label = "📦 Stock DB (Fallback)"
+            else:
+                source_label = "📊 Primary DB"
+
             print(f"   ✅ MATCHED: Item No. {match['item_no']} ({source_label})")
-            print(f"      Excel: {match['wine_name']} {match['vintage']}")
+            print(f"      Wine: {match['wine_name']} {match['vintage']}")
             print(f"      Similarity: {match['similarity']:.1%}")
 
             entry.update({
@@ -581,15 +681,15 @@ def main():
     print("\n" + "="*100)
 
     # Generate output report
-    print("\nStep 5: Generating results report...")
+    print("\nStep 6: Generating results report...")
     generate_output_report(wine_entries, OUTPUT_DIR)
 
     # Update learning database
-    print("\nStep 6: Updating learning database...")
+    print("\nStep 7: Updating learning database...")
     update_learning_database(wine_entries, LEARNING_DB_FILE)
 
     # Create correction file for wines needing review
-    print("\nStep 7: Checking for wines needing correction...")
+    print("\nStep 8: Checking for wines needing correction...")
     correction_file = create_correction_file(wine_entries, OUTPUT_DIR)
 
     print("\n" + "="*100)
