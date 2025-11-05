@@ -337,7 +337,8 @@ def load_data_and_document():
 
         # Standardize columns
         df['CHF_KEY_FORMATTED'] = df[CHF_COL].astype(float).round(2).apply(lambda x: f'{x:.2f}')
-        df['EUR_VALUE_FORMATTED'] = df[EUR_COL].astype(float).round(2).apply(lambda x: f'{x:.2f}')
+        # Round EUR values to whole numbers (always .00 decimals)
+        df['EUR_VALUE_FORMATTED'] = df[EUR_COL].astype(float).round(0).apply(lambda x: f'{int(x)}.00')
         df['WINE_NAME_NORMALIZED'] = df[WINE_NAME_COL].astype(str)
 
         # Find duplicate CHF prices (same CHF, different EUR)

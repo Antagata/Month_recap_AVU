@@ -619,17 +619,19 @@ class AVUEchoSpinner(tk.Tk):
             self.results_text.insert(tk.END, f"  • NOT FOUND Entries: {not_found_count}\n", "error")
             self.results_text.insert(tk.END, "\n" + "-"*80 + "\n\n")
 
-            # Display entries in a formatted table
+            # Display entries in a formatted table (latest first)
             if valid_entries:
                 self.results_text.insert(tk.END, f"{'Wine Name':<40} {'Vintage':<10} {'Item No.':<10}\n", "header")
                 self.results_text.insert(tk.END, "-"*80 + "\n")
 
-                for wine, vintage, item in valid_entries[-50:]:  # Show last 50 entries
+                # Show last 50 entries in reverse order (latest first)
+                display_entries = valid_entries[-50:][::-1]
+                for wine, vintage, item in display_entries:
                     wine_short = wine[:38] + ".." if len(wine) > 40 else wine
                     self.results_text.insert(tk.END, f"{wine_short:<40} {vintage:<10} {item:<10}\n")
 
                 if len(valid_entries) > 50:
-                    self.results_text.insert(tk.END, f"\n... showing last 50 of {len(valid_entries)} entries\n", "info")
+                    self.results_text.insert(tk.END, f"\n... showing latest 50 of {len(valid_entries)} entries\n", "info")
             else:
                 self.results_text.insert(tk.END, "No valid entries found in learning database\n", "error")
 

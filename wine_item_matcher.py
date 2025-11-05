@@ -219,7 +219,14 @@ def load_excel_database(excel_path):
             lambda x: int(x) if pd.notna(x) and str(x).isdigit() else None
         )
 
-        print(f"✅ Loaded {len(df)} wines from primary database (Conversion_month.xlsx)")
+        # Sort by Schedule DateTime (descending) so latest campaigns are prioritized
+        if 'Schedule DateTime' in df.columns:
+            df = df.sort_values('Schedule DateTime', ascending=False, na_position='last')
+            print(f"✅ Loaded {len(df)} wines from primary database (Conversion_month.xlsx)")
+            print(f"   📅 Sorted by Schedule DateTime (latest campaigns first)")
+        else:
+            print(f"✅ Loaded {len(df)} wines from primary database (Conversion_month.xlsx)")
+
         return df
 
     except FileNotFoundError:
