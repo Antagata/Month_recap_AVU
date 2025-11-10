@@ -23,10 +23,11 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # --- CONFIGURATION (UPDATE THESE PATHS) ---
-WORD_FILE_PATH = r"C:\Users\Marco.Africani\Desktop\Month recap\month recap.docx"
-EXCEL_FILE_PATH = r"C:\Users\Marco.Africani\Desktop\Month recap\Conversion_month.xlsx"
-NEW_WORD_FILE_PATH = r"C:\Users\Marco.Africani\Desktop\Month recap\month recap_EUR.docx"
-LINES_EXCEL_PATH = r"C:\Users\Marco.Africani\Desktop\Month recap\Lines.xlsx"
+BASE_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
+WORD_FILE_PATH = rf"{BASE_DIR}\Inputs\month recap.docx"
+EXCEL_FILE_PATH = rf"{BASE_DIR}\Database\OMT Main Offer List.xlsx"
+NEW_WORD_FILE_PATH = rf"{BASE_DIR}\Outputs\month recap_EUR.docx"
+LINES_EXCEL_PATH = rf"{BASE_DIR}\Outputs\Lines.xlsx"
 
 # Excel column names
 CHF_COL = 'Unit Price'

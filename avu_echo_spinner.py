@@ -14,10 +14,12 @@ import os
 from PIL import Image, ImageTk
 
 # Configuration
-DEFAULT_WORD_FILE = r"C:\Users\Marco.Africani\Desktop\Month recap\month recap.docx"
-DEFAULT_WINE_LIST = r"C:\Users\Marco.Africani\Desktop\Month recap\ItemNoGenerator.txt"
-LOGO_PATH = r"C:\Users\Marco.Africani\Desktop\Month recap\static\images\spinner.jpg"
-LEARNING_DB = r"C:\Users\Marco.Africani\Desktop\Month recap\wine_names_learning_db.txt"
+BASE_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
+DEFAULT_WORD_FILE = rf"{BASE_DIR}\Inputs\month recap.docx"
+DEFAULT_WINE_LIST = rf"{BASE_DIR}\Inputs\ItemNoGenerator.txt"
+LOGO_PATH = rf"{BASE_DIR}\static\images\spinner.jpg"
+LEARNING_DB = rf"{BASE_DIR}\wine_names_learning_db.txt"
+OUTPUTS_DIR = rf"{BASE_DIR}\Outputs"
 
 
 class AVUEchoSpinner(tk.Tk):
@@ -451,26 +453,64 @@ class AVUEchoSpinner(tk.Tk):
                 self.results_text.insert(tk.END, "Running CHF → EUR Converter...\n\n")
                 self.results_text.update()
 
-                # Run the converter with explicit UTF-8 encoding
-                result = subprocess.run(
-                    [sys.executable, "word_converter_improved.py"],
-                    cwd=Path(__file__).parent,
-                    capture_output=True,
-                    text=True,
-                    encoding='utf-8',
-                    errors='replace',  # Replace invalid characters instead of crashing
-                    timeout=120
-                )
+                # Check if user entered text directly
+                direct_input = self.direct_para_text.get("1.0", tk.END).strip()
 
-                output = result.stdout + result.stderr
-                self.results_text.insert(tk.END, output)
+                if direct_input:
+                    # Direct paragraph conversion
+                    self.results_text.insert(tk.END, "Converting paragraph directly...\n\n")
+                    converted_text = self.convert_paragraph_direct(direct_input)
 
-                if result.returncode == 0:
-                    self.update_status("✅ Conversion completed successfully!")
-                    messagebox.showinfo("Success", "CHF → EUR conversion completed!\n\nCheck:\n- month recap_EUR.docx\n- Lines.xlsx")
+                    if converted_text:
+                        # Save to output file
+                        from datetime import datetime
+                        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                        output_file = Path(OUTPUTS_DIR) / f"Converted_Paragraph_{timestamp}.txt"
+
+                        with open(output_file, 'w', encoding='utf-8') as f:
+                            f.write("="*80 + "\n")
+                            f.write("DIRECT PARAGRAPH CONVERSION - CHF to EUR\n")
+                            f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                            f.write("="*80 + "\n\n")
+                            f.write("ORIGINAL TEXT:\n")
+                            f.write("-"*80 + "\n")
+                            f.write(direct_input + "\n\n")
+                            f.write("CONVERTED TEXT:\n")
+                            f.write("-"*80 + "\n")
+                            f.write(converted_text + "\n")
+
+                        # Display result
+                        self.results_text.insert(tk.END, f"✅ Conversion completed!\n\n")
+                        self.results_text.insert(tk.END, f"ORIGINAL:\n{direct_input}\n\n")
+                        self.results_text.insert(tk.END, f"CONVERTED:\n{converted_text}\n\n")
+                        self.results_text.insert(tk.END, f"📁 Saved to: {output_file.name}\n")
+
+                        self.update_status("✅ Paragraph conversion completed!")
+                        messagebox.showinfo("Success", f"Paragraph converted successfully!\n\nSaved to:\n{output_file}")
+                    else:
+                        self.update_status("❌ Conversion failed")
+                        messagebox.showerror("Error", "Could not convert paragraph")
                 else:
-                    self.update_status("❌ Conversion failed")
-                    messagebox.showerror("Error", f"Conversion failed with return code {result.returncode}")
+                    # Regular Word file conversion
+                    result = subprocess.run(
+                        [sys.executable, "word_converter_improved.py"],
+                        cwd=Path(__file__).parent,
+                        capture_output=True,
+                        text=True,
+                        encoding='utf-8',
+                        errors='replace',
+                        timeout=120
+                    )
+
+                    output = result.stdout + result.stderr
+                    self.results_text.insert(tk.END, output)
+
+                    if result.returncode == 0:
+                        self.update_status("✅ Conversion completed successfully!")
+                        messagebox.showinfo("Success", "CHF → EUR conversion completed!\n\nCheck:\n- Outputs/month recap_EUR.docx\n- Outputs/Lines.xlsx")
+                    else:
+                        self.update_status("❌ Conversion failed")
+                        messagebox.showerror("Error", f"Conversion failed with return code {result.returncode}")
 
             except subprocess.TimeoutExpired:
                 self.update_status("⏱️ Conversion timeout")
@@ -484,6 +524,61 @@ class AVUEchoSpinner(tk.Tk):
         # Run in thread to avoid freezing UI
         thread = threading.Thread(target=run, daemon=True)
         thread.start()
+
+    def convert_paragraph_direct(self, text):
+        """Convert a paragraph of text from CHF to EUR using a simplified approach"""
+        try:
+            import pandas as pd
+            import re
+
+            # Load the Excel database
+            excel_file = rf"{BASE_DIR}\Database\OMT Main Offer List.xlsx"
+            df = pd.read_excel(excel_file)
+
+            # Create conversion map (CHF -> EUR)
+            df['CHF_KEY'] = df['Unit Price'].astype(float).round(2).apply(lambda x: f'{x:.2f}')
+            df['EUR_VALUE'] = df['Unit Price (EUR)'].astype(float).round(0).apply(lambda x: f'{int(x)}.00')
+
+            conversion_map = {}
+            for _, row in df.iterrows():
+                chf = row['CHF_KEY']
+                eur = row['EUR_VALUE']
+                if chf not in conversion_map:
+                    conversion_map[chf] = eur
+
+            # Find and replace CHF prices
+            converted = text
+
+            # Pattern 1: "CHF XX.XX"
+            for match in re.finditer(r'[Cc][Hh][Ff]\s+(\d+(?:[\']\d{3})*\.?\d{0,2})', converted):
+                chf_str = match.group(1).replace("'", "")
+                if '.' not in chf_str:
+                    chf_str += '.00'
+                elif len(chf_str.split('.')[1]) == 1:
+                    chf_str += '0'
+
+                eur_value = conversion_map.get(chf_str, f"{int(float(chf_str) * 1.08)}.00")
+                converted = converted.replace(match.group(0), f'EUR {eur_value}')
+
+            # Pattern 2: "XX.XX CHF"
+            for match in re.finditer(r'(\d+(?:[\']\d{3})*\.?\d{0,2})\s+[Cc][Hh][Ff]', converted):
+                chf_str = match.group(1).replace("'", "")
+                if '.' not in chf_str:
+                    chf_str += '.00'
+                elif len(chf_str.split('.')[1]) == 1:
+                    chf_str += '0'
+
+                eur_value = conversion_map.get(chf_str, f"{int(float(chf_str) * 1.08)}.00")
+                converted = converted.replace(match.group(0), f'{eur_value} EUR')
+
+            # Replace any remaining CHF with EUR
+            converted = re.sub(r'\b[Cc][Hh][Ff]\b', 'EUR', converted)
+
+            return converted
+
+        except Exception as e:
+            self.results_text.insert(tk.END, f"\n❌ Error during conversion: {e}\n")
+            return None
 
     def run_matcher(self):
         """Run wine_item_matcher.py in a separate thread"""

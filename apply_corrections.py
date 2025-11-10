@@ -26,7 +26,9 @@ from pathlib import Path
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Configuration
-LEARNING_DB_FILE = r"C:\Users\Marco.Africani\Desktop\Month recap\wine_names_learning_db.txt"
+BASE_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
+LEARNING_DB_FILE = rf"{BASE_DIR}\wine_names_learning_db.txt"
+CORRECTIONS_DIR = rf"{BASE_DIR}\Outputs"  # Look for corrections files in Outputs folder
 
 
 def parse_corrections_file(corrections_file):
@@ -162,7 +164,7 @@ def apply_corrections_to_learning_db(corrections, learning_db_path):
     return True
 
 
-def find_latest_corrections_file(directory="."):
+def find_latest_corrections_file(directory=None):
     """
     Find the most recent CORRECTIONS_NEEDED_*.txt file in the directory.
 
@@ -171,6 +173,9 @@ def find_latest_corrections_file(directory="."):
     """
     import glob
     import os
+
+    if directory is None:
+        directory = CORRECTIONS_DIR
 
     # Find all corrections files
     pattern = str(Path(directory) / "CORRECTIONS_NEEDED_*.txt")

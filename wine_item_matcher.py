@@ -31,11 +31,12 @@ from pathlib import Path
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Configuration
-EXCEL_FILE = r"C:\Users\Marco.Africani\Desktop\Month recap\Conversion_month.xlsx"
-STOCK_FILE = r"C:\Users\Marco.Africani\Desktop\Month recap\Detailed Stock List.xlsx"  # Fallback database
-INPUT_FILE = r"C:\Users\Marco.Africani\Desktop\Month recap\ItemNoGenerator.txt"
-OUTPUT_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
-LEARNING_DB_FILE = r"C:\Users\Marco.Africani\Desktop\Month recap\wine_names_learning_db.txt"
+BASE_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
+EXCEL_FILE = rf"{BASE_DIR}\Database\OMT Main Offer List.xlsx"
+STOCK_FILE = rf"{BASE_DIR}\Database\Detailed Stock List.xlsx"  # Fallback database
+INPUT_FILE = rf"{BASE_DIR}\Inputs\ItemNoGenerator.txt"
+OUTPUT_DIR = rf"{BASE_DIR}\Outputs\Detailed match results"
+LEARNING_DB_FILE = rf"{BASE_DIR}\wine_names_learning_db.txt"  # Keep in root for easy access
 
 # Excel columns - Conversion_month.xlsx
 WINE_NAME_COL = 'Wine Name'
