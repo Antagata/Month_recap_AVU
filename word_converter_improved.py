@@ -1127,17 +1127,17 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
             # Replace "Magnum XX.XX" with "Magnum YY.YY EUR"
             all_replacements.append((match.start(), match.end(), f'Magnum {eur_value} EUR'))
 
-        # Pattern 6: 36x followed by number (no CHF after) - e.g., "36x 99.00 + VAT"
-        # Matches: "36x 99.00", "36x 1'150.00" but NOT "36x 33.00CHF"
+        # Pattern 6: 36x followed by number (with or without CHF) - e.g., "36x 99.00", "36x 99.00 CHF"
+        # Matches: "36x 99.00", "36x 99.00 CHF", "36x 1'150.00 CHF" but NOT "36x 33.00CHF" (no space)
         if len(chf_int) == 4:
-            pattern6 = r"\b36\s*x\s+" + chf_int[0] + r"['\u2019]?" + chf_int[1:] + r"\.00(?![Cc][Hh][Ff])"
+            pattern6 = r"\b36\s*x\s+" + chf_int[0] + r"['\u2019]?" + chf_int[1:] + r"\.00(?:\s+[Cc][Hh][Ff])?(?![Cc][Hh][Ff])"
         elif len(chf_int) == 5:
-            pattern6 = r"\b36\s*x\s+" + chf_int[:2] + r"['\u2019]?" + chf_int[2:] + r"\.00(?![Cc][Hh][Ff])"
+            pattern6 = r"\b36\s*x\s+" + chf_int[:2] + r"['\u2019]?" + chf_int[2:] + r"\.00(?:\s+[Cc][Hh][Ff])?(?![Cc][Hh][Ff])"
         else:
-            pattern6 = r"\b36\s*x\s+" + re.escape(chf_int) + r"\.00(?![Cc][Hh][Ff])"
+            pattern6 = r"\b36\s*x\s+" + re.escape(chf_int) + r"\.00(?:\s+[Cc][Hh][Ff])?(?![Cc][Hh][Ff])"
 
         for match in re.finditer(pattern6, text, re.IGNORECASE):
-            # Replace "36x XX.XX" with "36x YY.YY EUR"
+            # Replace "36x XX.XX" or "36x XX.XX CHF" with "36x YY.YY EUR"
             all_replacements.append((match.start(), match.end(), f'36x {eur_value} EUR'))
 
     # Remove overlapping replacements (keep the longest match at each position)

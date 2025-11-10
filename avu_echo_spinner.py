@@ -126,6 +126,38 @@ class AVUEchoSpinner(tk.Tk):
         )
         browse_btn.pack(side=tk.LEFT, padx=2)
 
+        # Direct paragraph input (above SPIN button)
+        direct_para_frame = tk.Frame(converter_frame, bg="#1a1a1a")
+        direct_para_frame.pack(fill=tk.BOTH, padx=10, pady=5)
+
+        tk.Label(
+            direct_para_frame,
+            text="Or Convert Paragraph Directly:",
+            font=("Arial", 10),
+            fg="#ffff00",
+            bg="#1a1a1a"
+        ).pack(anchor="w")
+
+        tk.Label(
+            direct_para_frame,
+            text="(Paste text with CHF prices, click SPIN to convert to EUR)",
+            font=("Arial", 8),
+            fg="#888888",
+            bg="#1a1a1a"
+        ).pack(anchor="w")
+
+        self.direct_para_text = scrolledtext.ScrolledText(
+            direct_para_frame,
+            height=4,
+            font=("Consolas", 9),
+            bg="#2d2d2d",
+            fg="#00ccff",
+            insertbackground="#00ccff",
+            relief=tk.FLAT,
+            bd=2
+        )
+        self.direct_para_text.pack(fill=tk.BOTH, expand=True, pady=5)
+
         # SPIN button (main converter button)
         spin_btn = tk.Button(
             converter_frame,
