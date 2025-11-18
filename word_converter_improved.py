@@ -324,6 +324,101 @@ def extract_wine_name_from_context(text, price_match_start):
     return ""
 
 
+def load_stock_lines():
+    """Load Stock Lines.xlsx for direct Item No. to EUR price matching"""
+    try:
+        print(f"Loading Stock Lines database from: {STOCK_FILE_PATH}")
+        stock_df = pd.read_excel(STOCK_FILE_PATH)
+
+        # Column mapping based on user specification:
+        # Column A: No. = Item No.
+        # Column AQ: OMT Last Private Offer Price = CHF price
+        # Column AU: OMT Last Offer Date = Campaign date
+
+        print(f"✅ Loaded {len(stock_df)} items from Stock Lines.xlsx")
+        return stock_df
+
+    except FileNotFoundError:
+        print(f"⚠️ Warning: Stock Lines.xlsx not found at {STOCK_FILE_PATH}")
+        print("   Falling back to standard conversion logic")
+        return None
+    except Exception as e:
+        print(f"⚠️ Warning: Error loading Stock Lines.xlsx: {e}")
+        print("   Falling back to standard conversion logic")
+        return None
+
+
+def match_price_via_stock_lines(chf_price, stock_df, omt_df, is_36_bottles=False):
+    """
+    Match CHF price to EUR price using Stock Lines.xlsx
+
+    Args:
+        chf_price: CHF price as string or float (e.g., "50.00" or 50.00)
+        stock_df: Stock Lines DataFrame
+        omt_df: OMT Main Offer List DataFrame
+        is_36_bottles: Whether this is a 36-bottle price (Min Quantity = 36)
+
+    Returns:
+        EUR price as string (e.g., "54.00") or None if not found
+    """
+    if stock_df is None or omt_df is None:
+        return None
+
+    try:
+        # Step 1: Find item in Stock Lines where CHF price matches (Column AQ)
+        # Column: 'OMT Last Private Offer Price'
+        chf_float = float(chf_price)
+        stock_matches = stock_df[
+            stock_df['OMT Last Private Offer Price'].astype(float).round(2) == round(chf_float, 2)
+        ]
+
+        if len(stock_matches) == 0:
+            return None
+
+        # If multiple matches, take first one
+        stock_row = stock_matches.iloc[0]
+
+        # Step 2: Get Item No. (Column A: 'No.') and Campaign Date (Column AU: 'OMT Last Offer Date')
+        item_no = int(stock_row['No.'])
+        campaign_date = pd.to_datetime(stock_row['OMT Last Offer Date'])
+
+        # Step 3: Match in OMT Main Offer List
+        # IMPORTANT: Match by date only (not time) since Stock Lines has midnight times
+        # Convert OMT Item No. to int for comparison
+        omt_df_copy = omt_df.copy()
+        omt_df_copy['Item No. Int'] = pd.to_numeric(omt_df_copy['Item No.'], errors='coerce').astype('Int64')
+        omt_df_copy['Date Only'] = pd.to_datetime(omt_df_copy['Schedule DateTime']).dt.date
+        campaign_date_only = campaign_date.date()
+
+        min_qty = 36 if is_36_bottles else 0
+
+        # Match by Item No., Date (not time), and Min Quantity
+        omt_matches = omt_df_copy[
+            (omt_df_copy['Item No. Int'] == item_no) &
+            (omt_df_copy['Date Only'] == campaign_date_only) &
+            (omt_df_copy['Minimum Quantity'] == min_qty)
+        ]
+
+        if len(omt_matches) == 0:
+            # Try without min quantity filter
+            omt_matches = omt_df_copy[
+                (omt_df_copy['Item No. Int'] == item_no) &
+                (omt_df_copy['Date Only'] == campaign_date_only)
+            ]
+
+        if len(omt_matches) > 0:
+            # Step 4: Return EUR price (Column J: 'Unit Price (EUR)')
+            eur_price = omt_matches.iloc[0]['Unit Price (EUR)']
+            eur_formatted = f"{int(round(float(eur_price)))}.00"
+            return eur_formatted
+
+        return None
+
+    except Exception as e:
+        # Silently fail and fall back to existing logic
+        return None
+
+
 def load_data_and_document():
     """Loads the Excel data, creates the conversion map, and loads the Word document."""
     conversion_map = {}
@@ -332,8 +427,12 @@ def load_data_and_document():
     duplicate_chf_prices = set()
     doc = None
     df_full = None  # Store full dataframe for reference
+    stock_df = None  # Stock Lines database
 
-    # 1. Load Excel File and Create Conversion Dictionary
+    # 1. Load Stock Lines (NEW - for simplified conversion)
+    stock_df = load_stock_lines()
+
+    # 2. Load OMT Main Offer List (Excel File)
     try:
         df = pd.read_excel(EXCEL_FILE_PATH)
         df_full = df.copy()
@@ -426,7 +525,7 @@ def load_data_and_document():
     except Exception as e:
         print(f"❌ Unexpected error loading Word file: {e}")
 
-    return doc, conversion_map, wine_data_map, duplicate_chf_prices, item_number_map
+    return doc, conversion_map, wine_data_map, duplicate_chf_prices, item_number_map, stock_df, df_full
 
 
 def round_to_5_or_0(value):
@@ -765,7 +864,8 @@ def export_to_lines_excel(conversion_records, output_path):
 
 
 def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_chf_prices,
-                         all_numbers_found, conversion_stats, conversion_records, item_number_map):
+                         all_numbers_found, conversion_stats, conversion_records, item_number_map,
+                         stock_df=None, df_full=None):
     """
     Performs search and replace at the run level, applying highlighting based on conversion type.
     Also tracks conversion data for Excel export.
@@ -888,6 +988,61 @@ def replace_and_highlight(paragraph, conversion_map, wine_data_map, duplicate_ch
 
         # Detect size indicator (75 or 150 for Magnum)
         detected_size = detect_size_indicator(text, position)
+
+        # NEW: Try Stock Lines lookup first (most reliable)
+        # This is the simplified conversion logic using Stock Lines.xlsx
+        if stock_df is not None and df_full is not None:
+            try:
+                stock_eur = match_price_via_stock_lines(
+                    chf_str,
+                    stock_df,
+                    df_full,
+                    is_36_bottles=(detected_quantity == 36)
+                )
+
+                if stock_eur is not None:
+                    # Stock Lines match found! Use this EUR value
+                    eur_value = stock_eur
+                    highlight_color = None  # No highlight for direct matches
+                    match_type = 'stock_lines_match'
+                    conversion_stats['direct'] += 1
+
+                    # Apply rounding rule for prices above 300 CHF
+                    chf_float = float(chf_str)
+                    if chf_float > 300:
+                        eur_float = float(eur_value)
+                        rounded_eur = round_to_5_or_0(eur_float)
+                        eur_value = f"{rounded_eur:.2f}"
+
+                    # Create wine data record for tracking
+                    wine_data = {
+                        'wine_name': context_wine or 'Unknown',
+                        'vintage': context_vintage,
+                        'size': detected_size,
+                        'min_quantity': detected_quantity,
+                        'chf_value': chf_str,
+                        'eur_value': eur_value,
+                        'source': 'Stock Lines.xlsx'
+                    }
+
+                    # Track conversion
+                    conversion_records.append({
+                        'Wine Name': wine_data.get('wine_name', ''),
+                        'Vintage': wine_data.get('vintage', ''),
+                        'Size': wine_data.get('size', ''),
+                        'CHF Price': chf_str,
+                        'EUR Price': eur_value,
+                        'Match Type': match_type,
+                        'Source': 'Stock Lines'
+                    })
+
+                    # Add to replacements
+                    replacements_to_do[chf_str] = (eur_value, highlight_color, context_wine, match_type)
+                    continue  # Skip to next price
+            except Exception as e:
+                # Stock Lines lookup failed, fall back to existing logic
+                print(f"⚠️ Stock Lines lookup error for CHF {chf_str}: {e}")
+                pass
 
         # If it's a market price reference, always use 1.08 conversion with RED highlight
         if is_market_price:
@@ -1300,7 +1455,7 @@ def main():
     print("CHF to EUR Converter with Wine Name Matching")
     print("="*80 + "\n")
 
-    doc, conversion_map, wine_data_map, duplicate_chf_prices, item_number_map = load_data_and_document()
+    doc, conversion_map, wine_data_map, duplicate_chf_prices, item_number_map, stock_df, df_full = load_data_and_document()
 
     if not doc:
         print("\nOperation aborted due to file loading errors.")
@@ -1326,7 +1481,8 @@ def main():
     for paragraph in doc.paragraphs:
         total_replacements += replace_and_highlight(
             paragraph, conversion_map, wine_data_map,
-            duplicate_chf_prices, all_numbers_found, conversion_stats, conversion_records, item_number_map
+            duplicate_chf_prices, all_numbers_found, conversion_stats, conversion_records, item_number_map,
+            stock_df, df_full
         )
 
     # 2. Iterate through all tables in the document (if any)
@@ -1336,7 +1492,8 @@ def main():
                 for paragraph in cell.paragraphs:
                     total_replacements += replace_and_highlight(
                         paragraph, conversion_map, wine_data_map,
-                        duplicate_chf_prices, all_numbers_found, conversion_stats, conversion_records, item_number_map
+                        duplicate_chf_prices, all_numbers_found, conversion_stats, conversion_records, item_number_map,
+                        stock_df, df_full
                     )
 
     # --- Statistics Report ---

@@ -8,7 +8,16 @@
       "Bash(test:*)",
       "Bash(del translate_documents.py translate_documents_text.py)",
       "Bash(taskkill:*)",
-      "Bash(if exist \"month recap_EUR.docx\" del \"month recap_EUR.docx\")"
+      "Bash(if exist \"month recap_EUR.docx\" del \"month recap_EUR.docx\")",
+      "Bash(del test_sassicaia.txt ItemNo_Results_20251105_163116.txt ItemNo_Results_20251105_163153.txt)",
+      "Bash(if exist \"test_sassicaia.txt\" del \"test_sassicaia.txt\")",
+      "Bash(if exist \"ItemNo_Results_20251105_163116.txt\" del \"ItemNo_Results_20251105_163116.txt\")",
+      "Bash(if exist \"ItemNo_Results_20251105_163153.txt\" del \"ItemNo_Results_20251105_163153.txt\")",
+      "Bash(powershell -Command:*)",
+      "Bash(python:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(del check_stock_columns.py test_conversion.txt)"
     ],
     "deny": [],
     "ask": []

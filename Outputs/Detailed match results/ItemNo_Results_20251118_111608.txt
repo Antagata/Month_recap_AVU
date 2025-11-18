@@ -1,0 +1,75 @@
+====================================================================================================
+WINE ITEM NUMBER MATCHING RESULTS
+Generated: 2025-11-18 11:16:08
+====================================================================================================
+
+SUMMARY
+----------------------------------------------------------------------------------------------------
+Total wines processed: 6
+Successfully matched: 6 (100.0%)
+Not matched: 0 (0.0%)
+
+
+RESULTS TABLE
+----------------------------------------------------------------------------------------------------
+Wine Name                                Vintage    Item No.     Similarity   Status
+----------------------------------------------------------------------------------------------------
+pavie                                    2019       51417        100.0%       ✅ MATCHED
+figeac                                   2018       48976        100.0%       ✅ MATCHED
+Cos d'Estournel                          2021       55625        100.0%       ✅ MATCHED
+montrose                                 2021       55552        100.0%       ✅ MATCHED
+Malescot                                 2022       57312        80.0%        ✅ MATCHED
+la mission                               2021       55704        80.0%        ✅ MATCHED
+
+
+DETAILED RESULTS
+====================================================================================================
+
+[1] pavie 2019
+    Parsed: pavie | Vintage: 2019
+    ✅ MATCHED: Item No. 51417
+       Excel Name: Pavie
+       Producer: Château Pavie
+       Size: 75.0 cl
+       Similarity: 100.0%
+
+[2] figeac 2018
+    Parsed: figeac | Vintage: 2018
+    ✅ MATCHED: Item No. 48976
+       Excel Name: Figeac
+       Producer: Château Figeac
+       Size: 75.0 cl
+       Similarity: 100.0%
+
+[3] Cos d'Estournel 2021
+    Parsed: Cos d'Estournel | Vintage: 2021
+    ✅ MATCHED: Item No. 55625
+       Excel Name: Cos d'Estournel
+       Producer: Château Cos d'Estournel
+       Size: 75.0 cl
+       Similarity: 100.0%
+
+[4] montrose 2021
+    Parsed: montrose | Vintage: 2021
+    ✅ MATCHED: Item No. 55552
+       Excel Name: Montrose
+       Producer: Château Montrose
+       Size: 75.0 cl
+       Similarity: 100.0%
+
+[5] Malescot 2022
+    Parsed: Malescot | Vintage: 2022
+    ✅ MATCHED: Item No. 57312
+       Excel Name: Malescot Saint-Exupéry
+       Producer: Château Malescot Saint Exupéry
+       Size: 75.0 cl
+       Similarity: 80.0%
+
+[6] la mission 2021
+    Parsed: la mission | Vintage: 2021
+    ✅ MATCHED: Item No. 55704
+       Excel Name: La Mission Haut-Brion
+       Producer: Château La Mission Haut Brion
+       Size: 75.0 cl
+       Similarity: 80.0%
+

@@ -1,0 +1,12 @@
+================================================================================
+DIRECT PARAGRAPH CONVERSION - CHF to EUR
+Generated: 2025-11-10 18:15:42
+================================================================================
+
+ORIGINAL TEXT:
+--------------------------------------------------------------------------------
+Château Montrose 2021: The Robert Parker’s Wine Advocate defined as “the wine of the vintage” with 97 Points (same rating as Haut Brion and Cheval Blanc) and beating all other top Chateau of Bordeaux –our special offer 85.00 CHF + VAT // 36x 80.00 CHF + VAT (Market Price CHF 130)
+
+CONVERTED TEXT:
+--------------------------------------------------------------------------------
+Château Montrose 2021: The Robert Parker’s Wine Advocate defined as “the wine of the vintage” with 97 Points (same rating as Haut Brion and Cheval Blanc) and beating all other top Chateau of Bordeaux –our special offer 88.00 EUR + VAT // 36x 88.00 EUR + VAT (Market Price EUR 140.00)
