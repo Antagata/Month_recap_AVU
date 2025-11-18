@@ -19,6 +19,7 @@ INPUT_FILE_PATH = rf"{BASE_DIR}\Inputs\Multi.txt"
 EXCEL_FILE_PATH = rf"{DATABASE_DIR}\OMT Main Offer List.xlsx"
 STOCK_FILE_PATH = rf"{DATABASE_DIR}\Stock Lines.xlsx"
 OUTPUTS_DIR = rf"{BASE_DIR}\Outputs"
+RECOGNITION_REPORT_DIR = rf"{BASE_DIR}\Outputs\Detailed match results"
 
 # Regex patterns for price detection
 # Pattern for EUR prices with or without decimals: "EUR 202.00", "EUR 202", "EUR 30.00"
@@ -278,8 +279,10 @@ def convert_txt_file():
             print(f"[OK] Filtered Stock Lines Excel saved: {output_excel_path}")
             print(f"   Contains {len(filtered_df)} recognized items")
 
-    # Generate recognition report
-    report_path = rf"{OUTPUTS_DIR}\Recognition_Report_{timestamp}.txt"
+    # Generate recognition report in Detailed match results folder
+    # Create directory if it doesn't exist
+    Path(RECOGNITION_REPORT_DIR).mkdir(parents=True, exist_ok=True)
+    report_path = rf"{RECOGNITION_REPORT_DIR}\Recognition_Report_{timestamp}.txt"
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write("="*80 + "\n")
         f.write("WINE RECOGNITION REPORT\n")

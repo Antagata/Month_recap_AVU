@@ -493,9 +493,9 @@ class AVUEchoSpinner(tk.Tk):
                         self.update_status("❌ Conversion failed")
                         messagebox.showerror("Error", "Could not convert paragraph")
                 else:
-                    # Regular Word file conversion
+                    # Text file conversion using Multi.txt
                     result = subprocess.run(
-                        [sys.executable, "word_converter_improved.py"],
+                        [sys.executable, "txt_converter.py"],
                         cwd=Path(__file__).parent,
                         capture_output=True,
                         text=True,
@@ -509,7 +509,7 @@ class AVUEchoSpinner(tk.Tk):
 
                     if result.returncode == 0:
                         self.update_status("✅ Conversion completed successfully!")
-                        messagebox.showinfo("Success", "CHF → EUR conversion completed!\n\nCheck:\n- Outputs/month recap_EUR.docx\n- Outputs/Lines.xlsx")
+                        messagebox.showinfo("Success", "Wine recognition and conversion completed!\n\nCheck:\n- Outputs/Multi_converted_XXX.txt\n- Outputs/Stock_Lines_Filtered_XXX.xlsx\n- Outputs/Detailed match results/Recognition_Report_XXX.txt")
                     else:
                         self.update_status("❌ Conversion failed")
                         messagebox.showerror("Error", f"Conversion failed with return code {result.returncode}")
