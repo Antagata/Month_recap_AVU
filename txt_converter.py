@@ -124,7 +124,7 @@ def match_price_via_stock_lines(eur_price, wine_name, vintage, stock_df, omt_df)
     Returns:
         dict with item info or None
     """
-    if stock_df is None or omt_df is None or not wine_name:
+    if stock_df is None or omt_df is None:
         return None
 
     try:
@@ -132,10 +132,11 @@ def match_price_via_stock_lines(eur_price, wine_name, vintage, stock_df, omt_df)
         omt_df_copy = omt_df.copy()
         omt_df_copy['Item No. Int'] = pd.to_numeric(omt_df_copy['Item No.'], errors='coerce').astype('Int64')
 
-        # Step 2: Find in OMT by EUR price
+        # Step 2: Find in OMT by EUR price (with tolerance for rounding)
         eur_float = float(eur_price)
+        # Try exact match first
         omt_matches = omt_df_copy[
-            omt_df_copy['Unit Price (EUR)'].astype(float).round(2) == round(eur_float, 2)
+            omt_df_copy['Unit Price (EUR)'].astype(float).round(0) == round(eur_float, 0)
         ]
 
         if len(omt_matches) == 0:
@@ -147,26 +148,39 @@ def match_price_via_stock_lines(eur_price, wine_name, vintage, stock_df, omt_df)
 
         for idx, omt_row in omt_matches.iterrows():
             score = 0
-            omt_wine = str(omt_row.get('Wine Name', '')).lower()
+            omt_wine = str(omt_row.get('Wine Name', '')).lower().strip()
             omt_vintage = omt_row.get('Vintage Code', None)
 
-            # Wine name similarity
-            if wine_name.lower() in omt_wine or omt_wine in wine_name.lower():
-                score += 10
+            # Wine name similarity (more lenient)
+            if wine_name:
+                wine_name_lower = wine_name.lower().strip()
+                # Direct match or substring match
+                if wine_name_lower in omt_wine or omt_wine in wine_name_lower:
+                    score += 10
+                # Partial word match
+                wine_words = wine_name_lower.split()
+                for word in wine_words:
+                    if len(word) > 3 and word in omt_wine:
+                        score += 3
 
             # Vintage match
             if vintage and omt_vintage:
                 try:
                     if int(omt_vintage) == vintage:
-                        score += 5
+                        score += 10
                 except:
                     pass
+            elif not wine_name:
+                # If no wine name, rely more on price+vintage
+                score += 5
 
+            # Even without wine name match, if vintage matches and price matches, that's good
             if score > best_score:
                 best_score = score
                 best_match = omt_row
 
-        if best_match is not None and best_score > 0:
+        # Accept match even with low score if price matches
+        if best_match is not None and (best_score > 0 or len(omt_matches) == 1):
             item_no = int(best_match['Item No. Int'])
 
             # Step 4: Find in Stock Lines
@@ -278,6 +292,25 @@ def convert_txt_file():
             filtered_df.to_excel(output_excel_path, index=False)
             print(f"[OK] Filtered Stock Lines Excel saved: {output_excel_path}")
             print(f"   Contains {len(filtered_df)} recognized items")
+
+    # Generate Lines.xlsx with recognized wine details
+    if recognized_items:
+        lines_data = []
+        for item in recognized_items:
+            lines_data.append({
+                'Wine Name': item['wine_name'],
+                'Vintage': item['vintage'],
+                'Size': item['size'],
+                'Producer': item['producer'],
+                'EUR Price': item['eur_price'],
+                'Item No.': item['item_no']
+            })
+
+        if lines_data:
+            lines_df = pd.DataFrame(lines_data)
+            lines_excel_path = rf"{OUTPUTS_DIR}\Lines.xlsx"
+            lines_df.to_excel(lines_excel_path, index=False)
+            print(f"[OK] Lines.xlsx saved with {len(lines_data)} recognized wines")
 
     # Generate recognition report in Detailed match results folder
     # Create directory if it doesn't exist
