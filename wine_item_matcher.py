@@ -32,8 +32,9 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Configuration
 BASE_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
-EXCEL_FILE = rf"{BASE_DIR}\Database\OMT Main Offer List.xlsx"
-STOCK_FILE = rf"{BASE_DIR}\Database\Detailed Stock List.xlsx"  # Fallback database
+DATABASE_DIR = r"C:\Users\Marco.Africani\OneDrive - AVU SA\AVU CPI Campaign\Puzzle_control_Reports\SOURCE_FILES"
+EXCEL_FILE = rf"{DATABASE_DIR}\OMT Main Offer List.xlsx"
+STOCK_FILE = rf"{DATABASE_DIR}\Stock Lines.xlsx"  # New stock database
 INPUT_FILE = rf"{BASE_DIR}\Inputs\ItemNoGenerator.txt"
 OUTPUT_DIR = rf"{BASE_DIR}\Outputs\Detailed match results"
 LEARNING_DB_FILE = rf"{BASE_DIR}\wine_names_learning_db.txt"  # Keep in root for easy access

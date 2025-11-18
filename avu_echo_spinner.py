@@ -15,6 +15,7 @@ from PIL import Image, ImageTk
 
 # Configuration
 BASE_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
+DATABASE_DIR = r"C:\Users\Marco.Africani\OneDrive - AVU SA\AVU CPI Campaign\Puzzle_control_Reports\SOURCE_FILES"
 DEFAULT_WORD_FILE = rf"{BASE_DIR}\Inputs\month recap.docx"
 DEFAULT_WINE_LIST = rf"{BASE_DIR}\Inputs\ItemNoGenerator.txt"
 LOGO_PATH = rf"{BASE_DIR}\static\images\spinner.jpg"
@@ -30,8 +31,9 @@ class AVUEchoSpinner(tk.Tk):
         self.geometry("900x700")
         self.configure(bg="#1a1a1a")
 
-        # Disable resizing for that classic Winamp look
-        self.resizable(False, False)
+        # Enable resizing - set minimum size
+        self.resizable(True, True)
+        self.minsize(900, 700)  # Minimum size to ensure readability
 
         # Variables
         self.word_file_path = tk.StringVar(value=DEFAULT_WORD_FILE)
@@ -532,7 +534,7 @@ class AVUEchoSpinner(tk.Tk):
             import re
 
             # Load the Excel database
-            excel_file = rf"{BASE_DIR}\Database\OMT Main Offer List.xlsx"
+            excel_file = rf"{DATABASE_DIR}\OMT Main Offer List.xlsx"
             df = pd.read_excel(excel_file)
 
             # Create conversion map (CHF -> EUR)

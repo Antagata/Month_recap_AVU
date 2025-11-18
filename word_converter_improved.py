@@ -24,8 +24,10 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # --- CONFIGURATION (UPDATE THESE PATHS) ---
 BASE_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
+DATABASE_DIR = r"C:\Users\Marco.Africani\OneDrive - AVU SA\AVU CPI Campaign\Puzzle_control_Reports\SOURCE_FILES"
 WORD_FILE_PATH = rf"{BASE_DIR}\Inputs\month recap.docx"
-EXCEL_FILE_PATH = rf"{BASE_DIR}\Database\OMT Main Offer List.xlsx"
+EXCEL_FILE_PATH = rf"{DATABASE_DIR}\OMT Main Offer List.xlsx"
+STOCK_FILE_PATH = rf"{DATABASE_DIR}\Stock Lines.xlsx"
 NEW_WORD_FILE_PATH = rf"{BASE_DIR}\Outputs\month recap_EUR.docx"
 LINES_EXCEL_PATH = rf"{BASE_DIR}\Outputs\Lines.xlsx"
 
