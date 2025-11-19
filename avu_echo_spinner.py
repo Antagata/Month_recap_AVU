@@ -16,7 +16,7 @@ from PIL import Image, ImageTk
 # Configuration
 BASE_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
 DATABASE_DIR = r"C:\Users\Marco.Africani\OneDrive - AVU SA\AVU CPI Campaign\Puzzle_control_Reports\SOURCE_FILES"
-DEFAULT_WORD_FILE = rf"{BASE_DIR}\Inputs\month recap.docx"
+DEFAULT_MULTI_FILE = rf"{BASE_DIR}\Inputs\Multi.txt"  # Changed from month recap.docx to Multi.txt
 DEFAULT_WINE_LIST = rf"{BASE_DIR}\Inputs\ItemNoGenerator.txt"
 LOGO_PATH = rf"{BASE_DIR}\static\images\spinner.jpg"
 LEARNING_DB = rf"{BASE_DIR}\wine_names_learning_db.txt"
@@ -36,7 +36,7 @@ class AVUEchoSpinner(tk.Tk):
         self.minsize(900, 700)  # Minimum size to ensure readability
 
         # Variables
-        self.word_file_path = tk.StringVar(value=DEFAULT_WORD_FILE)
+        self.word_file_path = tk.StringVar(value=DEFAULT_MULTI_FILE)
         self.wine_list_path = tk.StringVar(value=DEFAULT_WINE_LIST)
 
         self.setup_ui()
@@ -95,11 +95,11 @@ class AVUEchoSpinner(tk.Tk):
 
         tk.Label(
             word_input_frame,
-            text="Word Document:",
+            text="Document to Convert:",
             font=("Arial", 10),
             fg="#ffffff",
             bg="#1a1a1a",
-            width=15,
+            width=18,
             anchor="w"
         ).pack(side=tk.LEFT)
 
@@ -408,11 +408,11 @@ class AVUEchoSpinner(tk.Tk):
         self.refresh_learning_db()
 
     def browse_word_file(self):
-        """Browse for Word document"""
+        """Browse for document to convert"""
         filename = filedialog.askopenfilename(
-            title="Select Word Document",
-            filetypes=[("Word Documents", "*.docx"), ("All Files", "*.*")],
-            initialdir=Path(DEFAULT_WORD_FILE).parent
+            title="Select Document to Convert",
+            filetypes=[("Text Files", "*.txt"), ("Word Documents", "*.docx"), ("All Files", "*.*")],
+            initialdir=Path(DEFAULT_MULTI_FILE).parent
         )
         if filename:
             self.word_file_path.set(filename)
