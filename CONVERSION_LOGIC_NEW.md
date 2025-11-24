@@ -71,19 +71,24 @@ stock_matches = stock_df[stock_df['OMT Last Private Offer Price'] == 52.00]
 
 ### Step 4: Match in OMT Main Offer List
 ```python
-# BULLETPROOF MATCH using 3 keys:
+# BULLETPROOF MATCH using 5 keys:
 # 1. Item No. (from Stock Lines)
 # 2. Unit Price (CHF) - must match Stock Lines OMT Last Private Offer Price
 # 3. Minimum Quantity (0 for standard, 36 for bulk)
+# 4. Campaign Type = PRIVATE (exclude HORECA)
+# 5. Campaign Sub-Type = Normal (exclude Lead)
 
 omt_match = omt_df[
     (omt_df['Item No.'] == item_no) &
     (omt_df['Unit Price'] == chf_price) &
-    (omt_df['Minimum Quantity'] == min_quantity)
+    (omt_df['Minimum Quantity'] == min_quantity) &
+    (omt_df['Campaign Type'] == 'PRIVATE') &
+    (omt_df['Campaign Sub-Type'] == 'Normal')
 ]
 
 # Example: OMT row 3094
 # Item No. 65245, Unit Price = 49.00, Minimum Quantity = 0
+# Campaign Type = PRIVATE, Campaign Sub-Type = Normal
 ```
 
 ### Step 5: Pick Latest Schedule DateTime if Multiple Matches
@@ -138,10 +143,12 @@ Oreno 2023: New Release – One of Tuscany's most anticipated... EUR 57.00 + vat
 
 ### ✅ Advantages
 1. **NO fuzzy wine name matching** - relies only on exact CHF price match
-2. **NO ambiguity** - 3-key match (Item No. + CHF + Min Quantity) is unique
+2. **NO ambiguity** - 5-key match (Item No. + CHF + Min Quantity + Campaign Type + Campaign Sub-Type) is unique
 3. **NO campaign date dependency** - uses latest Schedule DateTime automatically
 4. **Handles multiple sizes** - can expand to retrieve prices for different bottle sizes
 5. **Handles bulk pricing** - separate Min Quantity = 36 matching
+6. **Filters campaign types** - only PRIVATE campaigns with Normal sub-type (excludes HORECA and Lead)
+7. **Preserves order** - output files maintain the same wine order as Multi.txt input
 
 ### 🔧 Fallback Strategy
 If CHF price not found in Stock Lines:
