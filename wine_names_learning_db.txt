@@ -98,3 +98,217 @@ Evangile | 2015 | 35728 | 2025-11-18 16:54:25
 Palmer | 2015 | 35302 | 2025-11-18 16:54:51
 Montrose | 2021 | 55552 | 2025-11-18 17:01:51
 Figeac | 2018 | 48976 | 2025-11-18 17:01:51
+Viñedo Chadwick | 2021 | 59183 | 2025-11-21 10:03:51
+Pingus | 2018 | 49024 | 2025-11-21 10:03:51
+Haut Brion | 2005 | 17320 | 2025-11-21 10:03:51
+Haut Brion | 2009 | 10567 | 2025-11-21 10:03:51
+Haut Brion | 2010 | 11187 | 2025-11-21 10:03:51
+Haut Brion | 2015 | 35425 | 2025-11-21 10:03:51
+Haut Brion | 2018 | 48968 | 2025-11-21 10:03:51
+La Mission Haut-Brion | 2020 | 53885 | 2025-11-21 10:03:51
+Les Carmes Haut Brion | 2022 | 57093 | 2025-11-21 10:03:51
+Pape Clément Blanc | 2009 | 4 | 2025-11-21 10:03:51
+Smith Haut Lafitte Rouge | 2009 | 4510 | 2025-11-21 10:03:51
+Margaux | 2018 | 48963 | 2025-11-21 10:03:51
+Margaux | 2019 | NOT_FOUND | 2025-11-21 10:03:51
+Lafite Rothschild | 2010 | 7050 | 2025-11-21 10:03:51
+Lafite Rothschild | 2018 | 48959 | 2025-11-21 10:03:51
+Lafite Rothschild | 2019 | 51359 | 2025-11-21 10:03:51
+Latour | 2009 | 10727 | 2025-11-21 10:03:51
+Latour | 2010 | 32122 | 2025-11-21 10:03:51
+Mouton Rothschild | 2016 | 40182 | 2025-11-21 10:03:51
+Mouton Rothschild | 2020 | 53881 | 2025-11-21 10:03:51
+Pichon Longueville Comtesse Lalande | 2016 | 40198 | 2025-11-21 10:03:51
+Pichon Longueville Comtesse Lalande | 2022 | 57074 | 2025-11-21 10:03:51
+Pontet Canet | 2010 | 4926 | 2025-11-21 10:03:51
+Clinet | 2009 | 660 | 2025-11-21 10:03:51
+La Conseillante | 2020 | 53961 | 2025-11-21 10:03:51
+La Conseillante | 2022 | 57065 | 2025-11-21 10:03:51
+Lafleur | 1982 | 3342 | 2025-11-21 10:03:51
+Lafleur | 2005 | 2088 | 2025-11-21 10:03:51
+Lafleur | 2015 | 36414 | 2025-11-21 10:03:51
+Pétrus | 2018 | 48962 | 2025-11-21 10:03:51
+Pétrus | 2020 | 51092 | 2025-11-21 10:03:51
+Vieux Château Certan | 2016 | 40235 | 2025-11-21 10:03:51
+Vieux Château Certan | 2019 | 51480 | 2025-11-21 10:03:51
+Angelus | 2005 | 16358 | 2025-11-21 10:03:51
+Angélus Hommage à Elisabeth Bouchet | 2016 | 54709 | 2025-11-21 10:03:51
+Ausone | 2005 | 182 | 2025-11-21 10:03:51
+Canon | 2020 | 53942 | 2025-11-21 10:03:51
+Canon | 2022 | 57060 | 2025-11-21 10:03:51
+Cheval Blanc | 2005 | 738 | 2025-11-21 10:03:51
+Cheval Blanc | 2015 | 35540 | 2025-11-21 10:03:51
+Cheval Blanc | 2016 | 40009 | 2025-11-21 10:03:51
+Cheval Blanc | 2019 | 51380 | 2025-11-21 10:03:51
+Figeac | 2020 | 53904 | 2025-11-21 10:03:51
+Pavie | 2010 | 4216 | 2025-11-21 10:03:51
+Cos d'Estournel | 2009 | 799 | 2025-11-21 10:03:51
+Cos d'Estournel | 2016 | 40032 | 2025-11-21 10:03:51
+Montrose | 2009 | 11209 | 2025-11-21 10:03:51
+Ducru Beaucaillou | 2009 | 1648 | 2025-11-21 10:03:51
+Léoville Poyferré | 2009 | 3031 | 2025-11-21 10:03:51
+Vosne Romanée Cros Parantoux | 1985 | 10031 | 2025-11-21 10:03:51
+Champagne le Mesnil | 2008 | 56777 | 2025-11-21 10:03:51
+Côte Rôtie La Mordorée | 1991 | NOT_FOUND | 2025-11-21 10:03:51
+Barolo | 2016 | 51869 | 2025-11-21 10:03:51
+Barolo Sperss | 2016 | 51869 | 2025-11-21 10:03:51
+Barolo Monfortino Riserva | 2010 | 43770 | 2025-11-21 10:03:51
+Barolo Villero Riserva | 2009 | 51168 | 2025-11-21 10:03:51
+Solaia | 2015 | 33006 | 2025-11-21 10:03:51
+Brunello di Montalcino Cerretalto | 2010 | 38586 | 2025-11-21 10:03:51
+Masseto | 2006 | NOT_FOUND | 2025-11-21 10:03:51
+Masseto | 2015 | 47570 | 2025-11-21 10:03:51
+Masseto | 2016 | 44143 | 2025-11-21 10:03:51
+Sassicaia | 2016 | 44147 | 2025-11-21 10:03:51
+Dominus | 2015 | 49120 | 2025-11-21 10:03:51
+Cabernet Sauvignon | 2012 | NOT_FOUND | 2025-11-21 10:03:51
+Cabernet Sauvignon | 2016 | 51177 | 2025-11-21 10:03:51
+Sloan Red | 2015 | 56457 | 2025-11-21 10:03:51
+La Joie | 2013 | 39096 | 2025-11-21 10:03:51
+La Muse | 2013 | 39095 | 2025-11-21 10:03:51
+La Muse | 2014 | NOT_FOUND | 2025-11-21 10:03:51
+Viñedo Chadwick | 2021 | 59184 | 2025-11-21 10:04:01
+Pingus | 2018 | 65532 | 2025-11-21 10:04:01
+Haut Brion | 2005 | 11181 | 2025-11-21 10:04:01
+Haut Brion | 2009 | 10151 | 2025-11-21 10:04:01
+Haut Brion | 2010 | 23002 | 2025-11-21 10:04:01
+Haut Brion | 2015 | 35426 | 2025-11-21 10:04:01
+Haut Brion | 2018 | 49485 | 2025-11-21 10:04:01
+La Mission Haut-Brion | 2020 | 54440 | 2025-11-21 10:04:01
+Les Carmes Haut Brion | 2022 | 58310 | 2025-11-21 10:04:01
+Pape Clément Blanc | 2009 | 21376 | 2025-11-21 10:04:01
+Smith Haut Lafitte Rouge | 2009 | NOT_FOUND | 2025-11-21 10:04:01
+Margaux | 2018 | 49474 | 2025-11-21 10:04:01
+Margaux | 2019 | 51593 | 2025-11-21 10:04:01
+Lafite Rothschild | 2010 | 26998 | 2025-11-21 10:04:01
+Lafite Rothschild | 2018 | 49502 | 2025-11-21 10:04:01
+Lafite Rothschild | 2019 | 51360 | 2025-11-21 10:04:01
+Latour | 2010 | 56360 | 2025-11-21 10:04:01
+Mouton Rothschild | 2016 | 41710 | 2025-11-21 10:04:01
+Mouton Rothschild | 2020 | 54472 | 2025-11-21 10:04:01
+Pichon Longueville Comtesse Lalande | 2016 | 43080 | 2025-11-21 10:04:01
+Pichon Longueville Comtesse Lalande | 2022 | 58390 | 2025-11-21 10:04:01
+Pontet Canet | 2010 | 4828 | 2025-11-21 10:04:01
+Clinet | 2009 | NOT_FOUND | 2025-11-21 10:04:01
+La Conseillante | 2020 | 54501 | 2025-11-21 10:04:01
+La Conseillante | 2022 | 58985 | 2025-11-21 10:04:01
+Lafleur | 1982 | 2077 | 2025-11-21 10:04:01
+Lafleur | 2005 | 2615 | 2025-11-21 10:04:01
+Lafleur | 2015 | 38500 | 2025-11-21 10:04:01
+Pétrus | 2018 | 54906 | 2025-11-21 10:04:01
+Pétrus | 2020 | 59056 | 2025-11-21 10:04:01
+Vieux Château Certan | 2016 | NOT_FOUND | 2025-11-21 10:04:01
+Vieux Château Certan | 2019 | 51704 | 2025-11-21 10:04:01
+Angelus | 2005 | 7065 | 2025-11-21 10:04:01
+Angélus Hommage à Elisabeth Bouchet | 2016 | 54710 | 2025-11-21 10:04:01
+Ausone | 2005 | 23236 | 2025-11-21 10:04:01
+Canon | 2020 | 54379 | 2025-11-21 10:04:01
+Canon | 2022 | 58914 | 2025-11-21 10:04:01
+Cheval Blanc | 2005 | 1398 | 2025-11-21 10:04:01
+Cheval Blanc | 2015 | 35541 | 2025-11-21 10:04:01
+Cheval Blanc | 2016 | 42804 | 2025-11-21 10:04:01
+Cheval Blanc | 2019 | 51381 | 2025-11-21 10:04:01
+Figeac | 2020 | 54496 | 2025-11-21 10:04:01
+Pavie | 2010 | 25958 | 2025-11-21 10:04:01
+Cos d'Estournel | 2009 | 1469 | 2025-11-21 10:04:01
+Cos d'Estournel | 2016 | 40424 | 2025-11-21 10:04:01
+Montrose | 2009 | NOT_FOUND | 2025-11-21 10:04:01
+Ducru Beaucaillou | 2009 | 24142 | 2025-11-21 10:04:01
+Léoville Poyferré | 2009 | 2273 | 2025-11-21 10:04:01
+Vosne Romanée Cros Parantoux | 1985 | NOT_FOUND | 2025-11-21 10:04:01
+Champagne le Mesnil | 2008 | 64015 | 2025-11-21 10:04:01
+Barolo | 2016 | 59247 | 2025-11-21 10:04:01
+Barolo Sperss | 2016 | NOT_FOUND | 2025-11-21 10:04:01
+Barolo Monfortino Riserva | 2010 | 43771 | 2025-11-21 10:04:01
+Barolo Villero Riserva | 2009 | NOT_FOUND | 2025-11-21 10:04:01
+Solaia | 2015 | 47692 | 2025-11-21 10:04:01
+Brunello di Montalcino Cerretalto | 2010 | NOT_FOUND | 2025-11-21 10:04:01
+Masseto | 2006 | 7944 | 2025-11-21 10:04:01
+Masseto | 2015 | 47572 | 2025-11-21 10:04:01
+Masseto | 2016 | 49680 | 2025-11-21 10:04:01
+Sassicaia | 2016 | 48733 | 2025-11-21 10:04:01
+Dominus | 2015 | 51883 | 2025-11-21 10:04:01
+Cabernet Sauvignon | 2016 | NOT_FOUND | 2025-11-21 10:04:01
+Sloan Red | 2015 | NOT_FOUND | 2025-11-21 10:04:01
+La Joie | 2013 | 39100 | 2025-11-21 10:04:01
+La Muse | 2013 | 39099 | 2025-11-21 10:04:01
+Magnum Cristal Rosé | 2014 | 57329 | 2025-11-24 16:51:05
+Bollinger RD | 2008 | NOT_FOUND | 2025-11-24 16:51:05
+Krug Rosé 29ème Édition | N/A | NOT_FOUND | 2025-11-24 16:51:05
+Champagne Brut Cristal - Louis Roederer | 2012 | 65806 | 2025-11-24 16:51:05
+Champagne Brut – Delamotte | N/A | 62116 | 2025-11-24 16:51:05
+Champagne Grande Année Bollinger | 2015 | 62046 | 2025-11-24 16:51:05
+Château Haut-Marbuzet | 2019 | 51407 | 2025-11-24 16:51:05
+Phélan Ségur | 2018 | 49069 | 2025-11-24 16:51:05
+Crognolo | 2022 | 62101 | 2025-11-24 16:51:05
+Château Grand-Puy-Lacoste | 2021 | 55632 | 2025-11-24 16:51:05
+Château Phélan Ségur | 2021 | 55595 | 2025-11-24 16:51:05
+Aromes de Pavie | 2020 | 53916 | 2025-11-24 16:51:05
+Fieuzal Rouge | 2023 | 60436 | 2025-11-24 16:51:05
+Tignanello - Antinori | 2022 | 63038 | 2025-11-24 16:51:05
+Guado al Tasso | 2022 | 63048 | 2025-11-24 16:51:05
+Paleo Rosso | 2021 | 63717 | 2025-11-24 16:51:05
+Château Croix de Labrie | 2022 | 57085 | 2025-11-24 16:51:05
+Le Serre Nuove dell’Ornellaia | 2022 | 62359 | 2025-11-24 16:51:05
+Vigna d’Alceo | 2019 | 59480 | 2025-11-24 16:51:05
+San Leonardo | 2020 | 65762 | 2025-11-24 16:51:05
+Château Issan | 2022 | 57114 | 2025-11-24 16:51:05
+Château Croix de Labrie | N/A | 57085 | 2025-11-24 16:51:05
+Argentiera | 2021 | 62264 | 2025-11-24 16:51:05
+Argentiera | 2022 | 63223 | 2025-11-24 16:51:05
+Clos Apalta | 2021 | 62145 | 2025-11-24 16:51:05
+Barolo Ginestra Casa Maté | 2021 | 63691 | 2025-11-24 16:51:05
+Cos d’Estournel | 2021 | 55625 | 2025-11-24 16:51:05
+Château Giscours | 2022 | 57088 | 2025-11-24 16:51:05
+Châteauneuf-du-Pape – Clos des Papes – | 2023 | 65872 | 2025-11-24 16:51:05
+Pape Clément Rouge | 2022 | 57096 | 2025-11-24 16:51:05
+Larcis Ducase | 2022 | 57068 | 2025-11-24 16:51:05
+Château Bélair-Monange | 2020 | 53980 | 2025-11-24 16:51:05
+Riesling Vogelsang Grosse Lage | 2020 | 59393 | 2025-11-24 16:51:05
+La Joie Vérité | 2008 | 15447 | 2025-11-24 16:51:05
+Único | 2014 | 19163 | 2025-11-24 16:51:05
+Único | 2013 | 56812 | 2025-11-24 16:51:06
+Único | 2013 | 62761 | 150.0 | 2025-11-24 16:51:06
+Château Calon Ségur | 2005 | 23512 | 2025-11-24 16:51:05
+Ornellaia | 2021 | 60030 | 2025-11-24 16:51:05
+Château Figeac | 2018 | 48976 | 2025-11-24 16:51:05
+Smith Haut Lafitte Blanc | 2018 | 49026 | 2025-11-24 16:51:05
+Bibi Graetz Colore | 2021 | 59150 | 2025-11-24 16:51:05
+Château Canon | 2015 | 35636 | 2025-11-24 16:51:05
+Château Pavie | 2019 | 51417 | 2025-11-24 16:51:05
+Castillo Ygay | 2011 | 55520 | 2025-11-24 16:51:05
+Solaia | 2021 | 62138 | 2025-11-24 16:51:05
+Opus One | 2022 | 65428 | 2025-11-24 16:51:05
+Piedra Inifinita | 2021 | 65731 | 2025-11-24 16:51:05
+Vigna d’Alceo | 2006 | 57921 | 2025-11-24 16:51:05
+La Mission Haut Brion | 2016 | 40097 | 2025-11-24 16:51:05
+Cuvée Annamaria Clementi Brut | 2016 | 65898 | 2025-11-24 16:51:05
+The Mascot | 2021 | 65405 | 2025-11-24 16:51:05
+Château Pavie - St. Emilion – | 2016 | 40187 | 2025-11-24 16:51:05
+Cabernet Sauvignon Private Reserve - Beaulieu Vineyard – | 2019 | 56403 | 2025-11-24 16:51:05
+La Faraona | 2023 | 61985 | 2025-11-24 16:51:05
+Ausone | 2009 | 1054 | 2025-11-24 16:51:05
+Corton Charlemagne Grand Cru | 2023 | 65738 | 2025-11-24 16:51:05
+Vintage Port Nacional | 2001 | 38620 | 2025-11-24 16:51:05
+Figeac | 2015 | 35556 | 2025-11-24 16:51:05
+Château Margaux | 2022 | 57156 | 2025-11-24 16:51:05
+Cros Parantoux – Emmanuel Rouget | 2018 | 62132 | 2025-11-24 16:51:05
+Masseto | 2022 | 63156 | 2025-11-24 16:51:05
+Ausone | 2016 | 39959 | 2025-11-24 16:51:05
+Le Pin | 2020 | 53944 | 2025-11-24 16:51:05
+Mouton Rothschild | 2009 | 4369 | 2025-11-24 16:51:05
+Bollinger RD | 2008 | 49782 | 2025-11-24 18:37:00 (manual correction)
+Krug Rosé 29ème Édition | None | 58914 | 2025-11-24 18:37:00 (manual correction)
+Bollinger RD | 2008 | 56997 | 2025-11-24 18:40:55 (manual correction)
+Krug Rosé 29ème Édition | None | 65274 | 2025-11-24 18:40:55 (manual correction)
+Château Calon Ségur | 2005 | 23521 | 2025-11-24 18:40:55 (manual correction)
+Cros Parantoux – Emmanuel Rouget | 2018 | 62132 | 2025-11-24 18:40:55 (manual correction)
+Don PX Convento Selectcion - | 1946 | 15781 | 2025-11-25 13:48:45
+Cabernet Sauvignon - Eisele Vineyard – | 2019 | 56772 | 2025-11-25 13:57:30
+Barolo Monfortino Riserva | 2013 | 49764 | 2025-11-25 13:57:30
+Pétrus | 2000 | 4275 | 2025-11-25 13:57:30
+Echézeaux | 2022 | 65890 | 2025-11-25 13:57:30
+Trotanoy | 2009 | 5215 | 2025-11-25 13:57:30
+Cabernet Sauvignon - Eisele Vineyard | 2019 | 56772 | 2025-11-25 13:57:30
+Château Cheval Blanc St. Emilion | 2000 | 1517 | 2025-11-25 13:57:30
+Château Cheval Blanc St. Emilion – | 2021 | 55419 | 2025-11-25 13:57:30
