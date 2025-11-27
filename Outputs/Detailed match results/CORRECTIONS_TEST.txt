@@ -1,0 +1,21 @@
+====================================================================================================
+WINE CORRECTIONS FILE
+Generated: 2025-11-24 18:30:00
+====================================================================================================
+
+INSTRUCTIONS:
+----------------------------------------------------------------------------------------------------
+1. For each wine below, look up the correct Item Number in your Excel
+2. Replace 'YOUR_ITEM_NO_HERE' with the actual Item Number
+3. Save this file
+4. Click "Apply Corrections" button in GUI
+
+Format: Wine Name | Vintage | Item No. | Notes
+====================================================================================================
+
+[1] Bollinger RD 2008
+Bollinger RD | 2008 | 49782 | Corrected - found in Stock Lines
+
+[2] Krug Rosé 29ème Édition
+Krug Rosé 29ème Édition | None | 58914 | Corrected - found in Stock Lines
+

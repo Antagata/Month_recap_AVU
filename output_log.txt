@@ -1,0 +1,127 @@
+================================================================================
+TXT File CHF to EUR Converter (FAST)
+================================================================================
+
+Loading Stock Lines database...
+[OK] Loaded 4878 items from Stock Lines.xlsx
+Loading OMT Main Offer List...
+[OK] Loaded 29865 rows from OMT Main Offer List.xlsx
+[OK] Loaded input file: C:\Users\Marco.Africani\Desktop\Month recap\Inputs\Multi.txt
+[INFO] Found 113 CHF prices in input file
+
+[1/113] Matched: Magnum Cristal Ros 2014 - CHF 900.0 -> EUR 972.0 (Item 35638)
+[2/113] Matched: Bollinger RD 2008 - CHF 230.0 -> EUR 250.0 (Item 49782)
+[3/113] Matched:  None - CHF 300.0 -> EUR 324.0 (Item 58914)
+[4/113] Matched:  None - CHF 290.0 -> EUR 290.0 (Item 62045)
+[6/113] Matched:  None - CHF 29.0 -> EUR 32.0 (Item 62116)
+[7/113] Matched: Champagne Grande Anne Bollinger 2015 - CHF 105.0 -> EUR 114.0 (Item 62044)
+[8/113] Matched:  None - CHF 50.0 -> EUR 55.0 (Item 51783)
+[9/113] Matched: Chteau Haut-Marbuzet 2019 - CHF 30.0 -> EUR 33.0 (Item 55595)
+[10/113] Matched: Phlan Sgur 2018 - CHF 35.0 -> EUR 38.0 (Item 49069)
+[11/113] Matched: Crognolo 2022 - CHF 17.0 -> EUR 19.0 (Item 62101)
+[12/113] Matched: Chteau Grand-Puy-Lacoste 2021 - CHF 39.0 -> EUR 42.0 (Item 55632)
+[13/113] Matched: Chteau Grand-Puy-Lacoste 2021 - CHF 37.0 -> EUR 40.0 (Item 60043)
+[15/113] Matched: Chteau Phlan Sgur 2021 - CHF 29.0 -> EUR 32.0 (Item 62116)
+[16/113] Matched: Aromes de Pavie 2020 - CHF 45.0 -> EUR 48.0 (Item 64736)
+[17/113] Matched: Aromes de Pavie 2020 - CHF 43.0 -> EUR 47.0 (Item 65281)
+[19/113] Matched: Fieuzal Rouge 2023 - CHF 24.0 -> EUR 26.0 (Item 57206)
+[20/113] Matched:  None - CHF 50.0 -> EUR 55.0 (Item 51783)
+[21/113] Matched: Tignanello - Antinori 2022 - CHF 110.0 -> EUR 95.0 (Item 63050)
+[22/113] Matched: Guado al Tasso 2022 - CHF 95.0 -> EUR 103.0 (Item 63048)
+[23/113] Matched: Paleo Rosso 2021 - CHF 79.0 -> EUR 85.0 (Item 63717)
+[24/113] Matched: Chteau Croix de Labrie 2022 - CHF 69.0 -> EUR 75.0 (Item 57085)
+[25/113] Matched: Chteau Croix de Labrie 2022 - CHF 67.0 -> EUR 73.0 (Item 8110)
+[27/113] Matched: Le Serre Nuove dellOrnellaia 2022 - CHF 44.0 -> EUR 48.0 (Item 14956)
+[28/113] Matched: Vigna dAlceo 2019 - CHF 90.0 -> EUR 98.0 (Item 64170)
+[29/113] Matched: Vigna dAlceo 2019 - CHF 88.0 -> EUR 95.0 (Item 61839)
+[31/113] Matched: San Leonardo 2020 - CHF 52.0 -> EUR 52.0 (Item 60438)
+[32/113] Matched 36-bottle: Château Issan 2022 - CHF 58.0 -> EUR 63.0 (Item 57114, Min Qty 36)
+[32/113] Matched: Chteau Issan 2022 - CHF 59.0 -> EUR 64.0 (Item 57114)
+[34/113] Matched 36-bottle: Château Croix de Labrie: The 2022 - CHF 67.0 -> EUR 73.0 (Item 57085, Min Qty 36)
+[34/113] Matched: Chteau Croix de Labrie: The 2022 - CHF 69.0 -> EUR 75.0 (Item 57085)
+[36/113] Matched: Argentiera 2021 - CHF 63.0 -> EUR 68.0 (Item 63223)
+[37/113] Matched: Argentiera 2021 - CHF 62.0 -> EUR 67.0 (Item 63172)
+[39/113] Matched: Argentiera 2022 - CHF 62.0 -> EUR 67.0 (Item 63172)
+[40/113] Matched 36-bottle: Clos Apalta 2021 - CHF 82.0 -> EUR 86.0 (Item 62145, Min Qty 36)
+[40/113] Matched: Clos Apalta 2021 - CHF 85.0 -> EUR 90.0 (Item 62145)
+[42/113] Matched 36-bottle: Barolo Ginestra Casa Maté 2021 - CHF 63.0 -> EUR 66.0 (Item 63691, Min Qty 36)
+[42/113] Matched: Barolo Ginestra Casa Mat 2021 - CHF 66.0 -> EUR 69.0 (Item 63691)
+[44/113] Matched: Cos dEstournel 2021 - CHF 90.0 -> EUR 98.0 (Item 64170)
+[46/113] Fallback: Chteau Giscours 2022 - CHF 57.0 -> EUR 61.56 (no match)
+[46/113] Fallback 36-bottle: Château Giscours 2022 - CHF 68.0 -> EUR 73.44 (no match)
+[47/113] Matched: Chteau Giscours 2022 - CHF 56.0 -> EUR 57.0 (Item 63659)
+[49/113] Matched: Pape Clment Rouge 2022 - CHF 64.0 -> EUR 70.0 (Item 57096)
+[50/113] Matched: Larcis Ducase 2022 - CHF 84.0 -> EUR 90.0 (Item 57068)
+[51/113] Matched:  None - CHF 100.0 -> EUR 110.0 (Item 58375)
+[52/113] Matched: Chteau Blair-Monange 2020 - CHF 125.0 -> EUR 135.0 (Item 56403)
+[53/113] Matched 36-bottle: Riesling Vogelsang Grosse Lage 2020 - CHF 160.0 -> EUR 175.0 (Item 35636, Min Qty 36)
+[53/113] Matched: Riesling Vogelsang Grosse Lage 2020 - CHF 170.0 -> EUR 185.0 (Item 35636)
+[55/113] Matched: La Joie, Vrit 2008 - CHF 225.0 -> EUR 245.0 (Item 15447)
+[56/113] Matched: nico 2014 - CHF 310.0 -> EUR 334.0 (Item 58310)
+[57/113] Matched: Chteau Calon Sgur 2005 - CHF 290.0 -> EUR 290.0 (Item 62045)
+[58/113] Matched: Ornellaia 2021 - CHF 180.0 -> EUR 195.0 (Item 55466)
+[59/113] Matched: Ornellaia 2021 - CHF 175.0 -> EUR 190.0 (Item 15781)
+[61/113] Matched: Chteau Figeac 2018 - CHF 140.0 -> EUR 150.0 (Item 58636)
+[62/113] Matched: Smith Haut Lafitte Blanc 2018 - CHF 115.0 -> EUR 110.0 (Item 64668)
+[63/113] Matched: Smith Haut Lafitte Blanc 2018 - CHF 110.0 -> EUR 95.0 (Item 63050)
+[65/113] Fallback: Bibi Graetz Colore 2021 - CHF 0.0 -> EUR 0.00 (no match)
+[66/113] Matched: Chteau Canon 2015 - CHF 170.0 -> EUR 185.0 (Item 35636)
+[67/113] Matched: Chteau Canon 2015 - CHF 160.0 -> EUR 175.0 (Item 64135)
+[69/113] Matched: Chteau Pavie 2019 - CHF 165.0 -> EUR 178.0 (Item 55520)
+[70/113] Matched 36-bottle: Castillo Ygay 2011 - CHF 155.0 -> EUR 168.0 (Item 55520, Min Qty 36)
+[70/113] Matched: Castillo Ygay 2011 - CHF 165.0 -> EUR 178.0 (Item 55520)
+[72/113] Matched 36-bottle: Solaia 2021 - CHF 260.0 -> EUR 282.0 (Item 62138, Min Qty 36)
+[72/113] Matched: Solaia 2021 - CHF 265.0 -> EUR 286.0 (Item 62138)
+[74/113] Matched 36-bottle: Opus One 2022 - CHF 248.0 -> EUR 270.0 (Item 65428, Min Qty 36)
+[74/113] Matched: Opus One 2022 - CHF 255.0 -> EUR 275.0 (Item 65428)
+[76/113] Matched: Piedra Inifinita 2021 - CHF 79.0 -> EUR 85.0 (Item 63717)
+[77/113] Matched: Vigna dAlceo 2006 - CHF 175.0 -> EUR 190.0 (Item 15781)
+[78/113] Matched 36-bottle: La Mission Haut Brion 2016 - CHF 265.0 -> EUR 286.0 (Item 40097, Min Qty 36)
+[78/113] Matched: La Mission Haut Brion 2016 - CHF 270.0 -> EUR 290.0 (Item 40097)
+[80/113] Matched: Don PX Convento Selectcion - 1946 - CHF 175.0 -> EUR 190.0 (Item 15781)
+[81/113] Matched: Cuve Annamaria Clementi Brut 2016 - CHF 104.0 -> EUR 110.0 (Item 65898)
+[82/113] Matched: The Mascot 2021 - CHF 150.0 -> EUR 162.0 (Item 65893)
+[84/113] Matched: Chteau Pavie - St. Emilion  2016 - CHF 240.0 -> EUR 260.0 (Item 40187)
+[85/113] Matched: Beaulieu Vineyard  2019 - CHF 125.0 -> EUR 135.0 (Item 56403)
+[86/113] Matched:  None - CHF 300.0 -> EUR 324.0 (Item 58914)
+[87/113] Matched: La Faraona 2023 - CHF 50.0 -> EUR 55.0 (Item 51783)
+[88/113] Matched: Ausone 2009 - CHF 250.0 -> EUR 270.0 (Item 64167)
+[89/113] Matched: Corton Charlemagne Grand Cru 2023 - CHF 900.0 -> EUR 972.0 (Item 35638)
+[90/113] Matched: nico 2014 - CHF 310.0 -> EUR 334.0 (Item 58310)
+[91/113] Matched: Vintage Port Nacional 2001 - CHF 600.0 -> EUR 648.0 (Item 24142)
+[92/113] Matched: Figeac 2015 - CHF 195.0 -> EUR 210.0 (Item 35556)
+[93/113] Matched: Mouton Rothschild 2016 - CHF 600.0 -> EUR 648.0 (Item 24142)
+[94/113] Matched: Mouton Rothschild 2016 - CHF 590.0 -> EUR 640.0 (Item 4369)
+[96/113] Matched: Chteau Margaux 2022 - CHF 550.0 -> EUR 595.0 (Item 65431)
+[97/113] Matched: Cros Parantoux 2018 - CHF 450.0 -> EUR 486.0 (Item 54496)
+[98/113] Matched: Masseto 2022 - CHF 620.0 -> EUR 650.0 (Item 65464)
+[99/113] Matched: Ausone 2016 - CHF 730.0 -> EUR 790.0 (Item 39959)
+[100/113] Matched: Ausone 2016 - CHF 700.0 -> EUR 756.0 (Item 59184)
+[101/113] Matched: Le Pin 2020 - CHF 800.0 -> EUR 865.0 (Item 65421)
+[102/113] Matched: Mouton Rothschild 2009 - CHF 590.0 -> EUR 640.0 (Item 4369)
+[104/113] Matched: Mouton Rothschild 2009 - CHF 580.0 -> EUR 625.0 (Item 63171)
+[105/113] Matched: Unico 2013 - CHF 690.0 -> EUR 745.0 (Item 62761)
+[106/113] Matched: Cabernet Sauvignon - Eisele Vineyard  2019 - CHF 440.0 -> EUR 475.0 (Item 56772)
+[107/113] Matched: Riserva 2013 - CHF 790.0 -> EUR 855.0 (Item 49764)
+[108/113] Matched: Ptrus 2000 - CHF 850.0 -> EUR 920.0 (Item 10144)
+[109/113] Matched: Echzeaux 2022 - CHF 650.0 -> EUR 702.0 (Item 58916)
+[110/113] Matched: Trotanoy 2009 - CHF 395.0 -> EUR 430.0 (Item 5215)
+[111/113] Matched: Cabernet Sauvignon - Eisele Vineyard 2019 - CHF 440.0 -> EUR 475.0 (Item 56772)
+[112/113] Matched: teau Cheval Blanc, St. Emilion 2000 - CHF 980.0 -> EUR 1060.0 (Item 1517)
+[113/113] Matched: Chteau Cheval Blanc, St. Emilion  2021 - CHF 375.0 -> EUR 405.0 (Item 55419)
+
+[OK] Output txt file saved: C:\Users\Marco.Africani\Desktop\Month recap\Outputs\Multi_converted_20251125_133500.txt
+[WARN] Generated corrections file with 83 questionable matches
+       Please review: C:\Users\Marco.Africani\Desktop\Month recap\Outputs\Detailed match results\CORRECTIONS_NEEDED_20251125_133500.txt
+[ERROR] Failed to generate Lines.xlsx: [WinError 32] The process cannot access the file because it is being used by another process
+
+================================================================================
+CONVERSION STATISTICS
+================================================================================
+Total CHF prices found: 113
+[OK] Successfully matched to Stock Lines: 97
+[WARN] Not matched: 16
+================================================================================
+
+
+[INFO] Translations skipped (checkbox disabled)

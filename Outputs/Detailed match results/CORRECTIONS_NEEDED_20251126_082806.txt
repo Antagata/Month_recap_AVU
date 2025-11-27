@@ -1,0 +1,337 @@
+========================================================================================================================
+WINE MATCHING CORRECTIONS NEEDED
+========================================================================================================================
+
+This file lists wines that either:
+1. Could not be matched in the database
+2. Were matched by PRICE ONLY (wine name could not be verified)
+
+HOW TO MAKE CORRECTIONS:
+- For each wine below, check if the matched Item Number is correct
+- If WRONG, enter the correct Item Number in the 'CORRECTED_ITEM_NO' field
+- Leave the field empty if the match is correct
+- After making corrections, click 'Apply Corrections' in the GUI
+
+FORMAT: CORRECTED_ITEM_NO: [enter number here or leave empty]
+========================================================================================================================
+
+
+1. WINE FROM MULTI.TXT:
+   Name: Magnum Cristal Rosé
+   Vintage: 2014
+   CHF Price: 900.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: NO MATCH FOUND
+   Vintage: 
+   Item No.: MANUAL_ENTRY_NEEDED
+
+   REASON: No database match found for this wine at this price
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+2. WINE FROM MULTI.TXT:
+   Name: Krug Rosé 29ème Édition
+   Vintage: Unknown
+   CHF Price: 300.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: Champagne Brut Rosé (Edition 29)
+   Vintage: NV
+   Item No.: 65274
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+3. WINE FROM MULTI.TXT:
+   Name: Krug Rosé 29ème Édition
+   Vintage: Unknown
+   CHF Price: 290.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: El Tamboril Tinto
+   Vintage: 2022
+   Item No.: 65590
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+4. WINE FROM MULTI.TXT:
+   Name: Champagne Brut – Delamotte
+   Vintage: Unknown
+   CHF Price: 29.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: Champagne Brut  
+   Vintage: NV
+   Item No.: 62116
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+5. WINE FROM MULTI.TXT:
+   Name: Château Grand-Puy-Lacoste
+   Vintage: 2021
+   CHF Price: 37.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: Il Pino di Biserno
+   Vintage: 2022
+   Item No.: 60043
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+6. WINE FROM MULTI.TXT:
+   Name: Aromes de Pavie
+   Vintage: 2020
+   CHF Price: 43.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: Les Pagodes de Cos Blanc (2nd Vin)
+   Vintage: 2024
+   Item No.: 64371
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+7. WINE FROM MULTI.TXT:
+   Name: Château Croix de Labrie
+   Vintage: 2022
+   CHF Price: 67.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: Champagne Brut Blanc de Blancs
+   Vintage: NV
+   Item No.: 8110
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+8. WINE FROM MULTI.TXT:
+   Name: Vigna d’Alceo
+   Vintage: 2019
+   CHF Price: 90.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: St. Aubin Derrière chez Edouard
+   Vintage: 2022
+   Item No.: 64170
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+9. WINE FROM MULTI.TXT:
+   Name: Château Giscours
+   Vintage: 2022
+   CHF Price: 57.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: NO MATCH FOUND
+   Vintage: 
+   Item No.: MANUAL_ENTRY_NEEDED
+
+   REASON: No database match found for this wine at this price
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+10. WINE FROM MULTI.TXT:
+   Name: Ornellaia
+   Vintage: 2021
+   CHF Price: 180.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: The Armagh
+   Vintage: 2021
+   Item No.: 62222
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+11. WINE FROM MULTI.TXT:
+   Name: Château Figeac
+   Vintage: 2018
+   CHF Price: 140.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: St. Aubin En Remilly
+   Vintage: 2022
+   Item No.: 64171
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+12. WINE FROM MULTI.TXT:
+   Name: Smith Haut Lafitte Blanc
+   Vintage: 2018
+   CHF Price: 110.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: Champagne Extra Brut Cuvée N° 743 Dégorgement Tardif
+   Vintage: NV
+   Item No.: 63050
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+13. WINE FROM MULTI.TXT:
+   Name: Bibi Graetz Colore
+   Vintage: 2021
+   CHF Price: 0.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: NO MATCH FOUND
+   Vintage: 
+   Item No.: MANUAL_ENTRY_NEEDED
+
+   REASON: No database match found for this wine at this price
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+14. WINE FROM MULTI.TXT:
+   Name: Château Canon
+   Vintage: 2015
+   CHF Price: 160.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: The Mascot
+   Vintage: 2020
+   Item No.: 62188
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+15. WINE FROM MULTI.TXT:
+   Name: La Faraona
+   Vintage: 2023
+   CHF Price: 50.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: Gran Reserva 904
+   Vintage: 2011
+   Item No.: 51783
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+16. WINE FROM MULTI.TXT:
+   Name: Ausone
+   Vintage: 2009
+   CHF Price: 250.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: Echezeaux Les Loachausses
+   Vintage: 2019
+   Item No.: 62332
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+17. WINE FROM MULTI.TXT:
+   Name: Cros Parantoux
+   Vintage: 2018
+   CHF Price: 450.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: Latour (Ex-Château)
+   Vintage: 2017
+   Item No.: 60065
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+18. WINE FROM MULTI.TXT:
+   Name: Ausone
+   Vintage: 2016
+   CHF Price: 700.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: Masseto
+   Vintage: 2019
+   Item No.: 54696
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+19. WINE FROM MULTI.TXT:
+   Name: Le Pin
+   Vintage: 2020
+   CHF Price: 800.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: NO MATCH FOUND
+   Vintage: 
+   Item No.: MANUAL_ENTRY_NEEDED
+
+   REASON: No database match found for this wine at this price
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================
+
+20. WINE FROM MULTI.TXT:
+   Name: Mouton Rothschild
+   Vintage: 2009
+   CHF Price: 580.0
+   Min Qty: 0
+
+   MATCHED TO DATABASE:
+   Wine: IX Proprietary Red Estate
+   Vintage: 2022
+   Item No.: 63171
+
+   REASON: Price-only match - wine name did not match database
+
+   >>> CORRECTED_ITEM_NO: 
+   ====================================================================================================

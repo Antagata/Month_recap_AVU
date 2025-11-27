@@ -17,7 +17,12 @@
       "Bash(python:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(del check_stock_columns.py test_conversion.txt)"
+      "Bash(del check_stock_columns.py test_conversion.txt)",
+      "Bash(findstr:*)",
+      "Bash(timeout 30 python:*)",
+      "Bash(del test_name_matching.py check_vintage_format.py)",
+      "Bash(dir \"C:\\Users\\Marco.Africani\\Desktop\\Month recap\\Outputs\\Detailed match results\\CORRECTIONS_NEEDED_*.txt\" /b /o-d)",
+      "Bash(del test_gui_corrections.py)"
     ],
     "deny": [],
     "ask": []

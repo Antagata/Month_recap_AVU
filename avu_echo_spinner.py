@@ -38,6 +38,7 @@ class AVUEchoSpinner(tk.Tk):
         # Variables
         self.word_file_path = tk.StringVar(value=DEFAULT_MULTI_FILE)
         self.wine_list_path = tk.StringVar(value=DEFAULT_WINE_LIST)
+        self.enable_translations = tk.BooleanVar(value=True)  # Translation checkbox
 
         self.setup_ui()
 
@@ -134,13 +135,32 @@ class AVUEchoSpinner(tk.Tk):
         direct_para_frame = tk.Frame(converter_frame, bg="#1a1a1a")
         direct_para_frame.pack(fill=tk.BOTH, padx=10, pady=5)
 
+        # Create a frame for label and checkbox on same line
+        para_label_frame = tk.Frame(direct_para_frame, bg="#1a1a1a")
+        para_label_frame.pack(fill=tk.X, anchor="w")
+
         tk.Label(
-            direct_para_frame,
+            para_label_frame,
             text="Or Convert Paragraph Directly:",
             font=("Arial", 10),
             fg="#ffff00",
             bg="#1a1a1a"
-        ).pack(anchor="w")
+        ).pack(side=tk.LEFT)
+
+        # Translation checkbox next to paragraph label
+        translation_checkbox = tk.Checkbutton(
+            para_label_frame,
+            text="Generate Translations (DE/FR)",
+            variable=self.enable_translations,
+            font=("Arial", 9),
+            fg="#00ccff",
+            bg="#1a1a1a",
+            selectcolor="#2d2d2d",
+            activebackground="#1a1a1a",
+            activeforeground="#00ff00",
+            cursor="hand2"
+        )
+        translation_checkbox.pack(side=tk.LEFT, padx=20)
 
         tk.Label(
             direct_para_frame,
@@ -364,6 +384,22 @@ class AVUEchoSpinner(tk.Tk):
         )
         refresh_btn.pack(side=tk.LEFT, padx=5)
 
+        load_corrections_btn = tk.Button(
+            control_frame,
+            text="📝 Load Corrections",
+            command=self.load_corrections_manually,
+            font=("Arial", 10),
+            bg="#ff6600",
+            fg="#ffffff",
+            activebackground="#ff8800",
+            activeforeground="#ffffff",
+            relief=tk.RAISED,
+            bd=2,
+            cursor="hand2",
+            width=18
+        )
+        load_corrections_btn.pack(side=tk.LEFT, padx=5)
+
         # Results display
         results_label = tk.Label(
             matcher_frame,
@@ -388,6 +424,81 @@ class AVUEchoSpinner(tk.Tk):
             height=15
         )
         self.results_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+
+        # ============ CORRECTIONS PANEL (INTERACTIVE) ============
+        self.corrections_frame = tk.LabelFrame(
+            self,
+            text=" Wine Corrections - Interactive ",
+            font=("Arial", 11, "bold"),
+            fg="#ff9900",
+            bg="#1a1a1a",
+            relief=tk.RIDGE,
+            bd=3
+        )
+        # Initially hidden - will show when corrections are needed
+
+        corrections_info = tk.Label(
+            self.corrections_frame,
+            text="Wines needing correction will appear here. Enter the correct Item Number for each wine.",
+            font=("Arial", 9),
+            fg="#ffcc00",
+            bg="#1a1a1a",
+            wraplength=850,
+            justify=tk.LEFT
+        )
+        corrections_info.pack(fill=tk.X, padx=10, pady=5)
+
+        # Scrollable frame for corrections table
+        corrections_canvas = tk.Canvas(self.corrections_frame, bg="#1a1a1a", height=200)
+        corrections_scrollbar = ttk.Scrollbar(self.corrections_frame, orient="vertical", command=corrections_canvas.yview)
+        self.corrections_table_frame = tk.Frame(corrections_canvas, bg="#1a1a1a")
+
+        self.corrections_table_frame.bind(
+            "<Configure>",
+            lambda e: corrections_canvas.configure(scrollregion=corrections_canvas.bbox("all"))
+        )
+
+        corrections_canvas.create_window((0, 0), window=self.corrections_table_frame, anchor="nw")
+        corrections_canvas.configure(yscrollcommand=corrections_scrollbar.set)
+
+        corrections_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        corrections_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Action buttons for corrections
+        corrections_btn_frame = tk.Frame(self.corrections_frame, bg="#1a1a1a")
+        corrections_btn_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        apply_corrections_btn = tk.Button(
+            corrections_btn_frame,
+            text="Apply All Corrections",
+            command=self.apply_interactive_corrections,
+            font=("Arial", 10, "bold"),
+            bg="#00aa00",
+            fg="#ffffff",
+            activebackground="#00cc00",
+            relief=tk.RAISED,
+            bd=2,
+            cursor="hand2",
+            width=20
+        )
+        apply_corrections_btn.pack(side=tk.LEFT, padx=5)
+
+        hide_corrections_btn = tk.Button(
+            corrections_btn_frame,
+            text="Hide Corrections",
+            command=self.hide_corrections_panel,
+            font=("Arial", 10),
+            bg="#666666",
+            fg="#ffffff",
+            relief=tk.RAISED,
+            bd=2,
+            cursor="hand2",
+            width=15
+        )
+        hide_corrections_btn.pack(side=tk.LEFT, padx=5)
+
+        # Storage for correction entry widgets
+        self.correction_entries = []
 
         # ============ STATUS BAR ============
         status_frame = tk.Frame(self, bg="#2d2d2d", height=25)
@@ -493,15 +604,16 @@ class AVUEchoSpinner(tk.Tk):
                         self.update_status("❌ Conversion failed")
                         messagebox.showerror("Error", "Could not convert paragraph")
                 else:
-                    # Text file conversion using Multi.txt
+                    # Integrated workflow: Match wines then convert
+                    # Now using integrated_converter.py instead of txt_converter.py
                     result = subprocess.run(
-                        [sys.executable, "txt_converter.py"],
+                        [sys.executable, "integrated_converter.py"],
                         cwd=Path(__file__).parent,
                         capture_output=True,
                         text=True,
                         encoding='utf-8',
                         errors='replace',
-                        timeout=120
+                        timeout=300  # Increased timeout for full workflow
                     )
 
                     output = result.stdout + result.stderr
@@ -510,9 +622,15 @@ class AVUEchoSpinner(tk.Tk):
                     if result.returncode == 0:
                         self.update_status("✅ Conversion completed successfully!")
                         messagebox.showinfo("Success", "Wine recognition and conversion completed!\n\nCheck:\n- Outputs/Multi_converted_XXX.txt\n- Outputs/Stock_Lines_Filtered_XXX.xlsx\n- Outputs/Detailed match results/Recognition_Report_XXX.txt")
+
+                        # Check for corrections file and show panel if needed
+                        self.check_for_corrections_file()
                     else:
                         self.update_status("❌ Conversion failed")
                         messagebox.showerror("Error", f"Conversion failed with return code {result.returncode}")
+
+                        # Even if conversion failed, check for corrections that might have been generated
+                        self.check_for_corrections_file()
 
             except subprocess.TimeoutExpired:
                 self.update_status("⏱️ Conversion timeout")
@@ -775,6 +893,225 @@ class AVUEchoSpinner(tk.Tk):
         except Exception as e:
             self.results_text.insert(tk.END, f"❌ Error loading learning database:\n{e}\n")
             self.update_status(f"❌ Error loading DB: {str(e)}")
+
+    def load_corrections_file(self, corrections_file_path):
+        """Parse CORRECTIONS_NEEDED file and populate interactive corrections table"""
+        try:
+            corrections = []
+            current_entry = {}
+
+            with open(corrections_file_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+
+            for line in lines:
+                line_stripped = line.strip()
+
+                if not line_stripped or line_stripped.startswith('='):
+                    continue
+
+                # Parse entry fields
+                if line_stripped.startswith('Name:'):
+                    current_entry['wine_name'] = line_stripped.replace('Name:', '').strip()
+                elif line_stripped.startswith('Vintage:') and 'wine_name' in current_entry:
+                    current_entry['vintage'] = line_stripped.replace('Vintage:', '').strip()
+                elif line_stripped.startswith('CHF Price:'):
+                    current_entry['chf_price'] = line_stripped.replace('CHF Price:', '').strip()
+                elif 'MATCHED TO DATABASE:' in line:
+                    # Next section starts
+                    pass
+                elif line_stripped.startswith('Wine:') and 'chf_price' in current_entry:
+                    current_entry['matched_wine'] = line_stripped.replace('Wine:', '').strip()
+                elif line_stripped.startswith('Item No.:'):
+                    current_entry['item_no'] = line_stripped.replace('Item No.:', '').strip()
+                elif line_stripped.startswith('REASON:'):
+                    current_entry['reason'] = line_stripped.replace('REASON:', '').strip()
+
+                    # Entry complete
+                    if current_entry.get('wine_name') and current_entry.get('vintage'):
+                        corrections.append(current_entry.copy())
+                    current_entry = {}
+
+            return corrections
+
+        except Exception as e:
+            print(f"Error loading corrections file: {e}")
+            return []
+
+    def show_corrections_panel(self, corrections_file_path):
+        """Display the corrections panel with wines needing correction"""
+        corrections = self.load_corrections_file(corrections_file_path)
+
+        if not corrections:
+            messagebox.showinfo("No Corrections", "No wines found needing correction.")
+            return
+
+        # Clear existing table
+        for widget in self.corrections_table_frame.winfo_children():
+            widget.destroy()
+        self.correction_entries.clear()
+
+        # Create header
+        header_frame = tk.Frame(self.corrections_table_frame, bg="#2d2d2d", relief=tk.RAISED, bd=2)
+        header_frame.pack(fill=tk.X, padx=5, pady=5)
+
+        tk.Label(header_frame, text="Wine Name", font=("Arial", 9, "bold"), fg="#ffff00", bg="#2d2d2d", width=25, anchor="w").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        tk.Label(header_frame, text="Vintage", font=("Arial", 9, "bold"), fg="#ffff00", bg="#2d2d2d", width=8).grid(row=0, column=1, padx=5, pady=5)
+        tk.Label(header_frame, text="Price", font=("Arial", 9, "bold"), fg="#ffff00", bg="#2d2d2d", width=8).grid(row=0, column=2, padx=5, pady=5)
+        tk.Label(header_frame, text="Suggested Item No.", font=("Arial", 9, "bold"), fg="#ffff00", bg="#2d2d2d", width=15).grid(row=0, column=3, padx=5, pady=5)
+        tk.Label(header_frame, text="Correct Item No.", font=("Arial", 9, "bold"), fg="#00ff00", bg="#2d2d2d", width=15).grid(row=0, column=4, padx=5, pady=5)
+        tk.Label(header_frame, text="Reason", font=("Arial", 9, "bold"), fg="#ffff00", bg="#2d2d2d", width=25, anchor="w").grid(row=0, column=5, padx=5, pady=5, sticky="w")
+
+        # Create rows for each correction
+        for idx, corr in enumerate(corrections):
+            row_frame = tk.Frame(self.corrections_table_frame, bg="#1a1a1a", relief=tk.GROOVE, bd=1)
+            row_frame.pack(fill=tk.X, padx=5, pady=2)
+
+            wine_short = corr['wine_name'][:22] + "..." if len(corr['wine_name']) > 25 else corr['wine_name']
+            reason_short = corr.get('reason', 'N/A')[:22] + "..." if len(corr.get('reason', '')) > 25 else corr.get('reason', 'N/A')
+
+            tk.Label(row_frame, text=wine_short, font=("Arial", 9), fg="#ffffff", bg="#1a1a1a", width=25, anchor="w").grid(row=0, column=0, padx=5, pady=3, sticky="w")
+            tk.Label(row_frame, text=corr['vintage'], font=("Arial", 9), fg="#ffffff", bg="#1a1a1a", width=8).grid(row=0, column=1, padx=5, pady=3)
+            tk.Label(row_frame, text=corr['chf_price'], font=("Arial", 9), fg="#ffffff", bg="#1a1a1a", width=8).grid(row=0, column=2, padx=5, pady=3)
+            tk.Label(row_frame, text=corr.get('item_no', 'N/A'), font=("Arial", 9), fg="#ff9900", bg="#1a1a1a", width=15).grid(row=0, column=3, padx=5, pady=3)
+
+            # Entry for user to input correct Item No.
+            item_entry = tk.Entry(row_frame, font=("Arial", 10), bg="#2d2d2d", fg="#00ff00", insertbackground="#00ff00", width=15)
+            item_entry.grid(row=0, column=4, padx=5, pady=3)
+
+            # Pre-fill with suggested Item No if it's not MANUAL_ENTRY_NEEDED
+            if corr.get('item_no') and corr['item_no'] not in ['MANUAL_ENTRY_NEEDED', 'NOT_FOUND']:
+                item_entry.insert(0, corr['item_no'])
+
+            tk.Label(row_frame, text=reason_short, font=("Arial", 8), fg="#cccccc", bg="#1a1a1a", width=25, anchor="w").grid(row=0, column=5, padx=5, pady=3, sticky="w")
+
+            # Store entry widget with wine info
+            self.correction_entries.append({
+                'wine_name': corr['wine_name'],
+                'vintage': corr['vintage'],
+                'entry': item_entry
+            })
+
+        # Show the panel
+        self.corrections_frame.pack(fill=tk.BOTH, expand=False, padx=10, pady=10, before=self.winfo_children()[-1])
+        self.update_status(f"Showing {len(corrections)} wines needing correction")
+
+    def hide_corrections_panel(self):
+        """Hide the corrections panel"""
+        self.corrections_frame.pack_forget()
+        self.update_status("Corrections panel hidden")
+
+    def apply_interactive_corrections(self):
+        """Apply corrections entered by user in the interactive panel"""
+        if not self.correction_entries:
+            messagebox.showwarning("No Corrections", "No corrections to apply.")
+            return
+
+        corrections = []
+        invalid_count = 0
+
+        for entry_info in self.correction_entries:
+            item_no = entry_info['entry'].get().strip()
+
+            if item_no:
+                # Validate Item No is numeric
+                try:
+                    int(item_no)
+                    corrections.append({
+                        'wine_name': entry_info['wine_name'],
+                        'vintage': entry_info['vintage'],
+                        'item_no': item_no
+                    })
+                except ValueError:
+                    invalid_count += 1
+
+        if invalid_count > 0:
+            messagebox.showwarning("Invalid Entries", f"{invalid_count} entries have invalid Item Numbers (must be numeric).\nThey will be skipped.")
+
+        if not corrections:
+            messagebox.showwarning("No Valid Corrections", "No valid corrections to apply.")
+            return
+
+        # Apply corrections to learning database
+        try:
+            from datetime import datetime
+
+            # Load existing database keys to avoid duplicates
+            existing_keys = set()
+            if Path(LEARNING_DB).exists():
+                with open(LEARNING_DB, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith('#'):
+                            parts = line.split(' | ')
+                            if len(parts) >= 3:
+                                key = f"{parts[0]}|{parts[1]}|{parts[2]}"
+                                existing_keys.add(key)
+
+            # Write new corrections
+            new_count = 0
+            duplicate_count = 0
+
+            with open(LEARNING_DB, 'a', encoding='utf-8') as f:
+                for corr in corrections:
+                    key = f"{corr['wine_name']}|{corr['vintage']}|{corr['item_no']}"
+
+                    if key not in existing_keys:
+                        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        entry_line = f"{corr['wine_name']} | {corr['vintage']} | {corr['item_no']} | {timestamp} (GUI correction)\n"
+                        f.write(entry_line)
+                        existing_keys.add(key)
+                        new_count += 1
+                    else:
+                        duplicate_count += 1
+
+            # Show success message
+            msg = f"Applied {new_count} corrections to learning database"
+            if duplicate_count > 0:
+                msg += f"\nSkipped {duplicate_count} duplicates"
+
+            messagebox.showinfo("Success", msg)
+
+            # Hide panel and refresh database display
+            self.hide_corrections_panel()
+            self.refresh_learning_db()
+
+            self.update_status(f"Applied {new_count} corrections successfully")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to apply corrections:\n{e}")
+            self.update_status(f"Error applying corrections: {str(e)}")
+
+    def load_corrections_manually(self):
+        """Allow user to manually select a CORRECTIONS_NEEDED file to load"""
+        corrections_dir = rf"{BASE_DIR}\Outputs\Detailed match results"
+        filename = filedialog.askopenfilename(
+            title="Select Corrections File",
+            filetypes=[("Text Files", "CORRECTIONS_NEEDED_*.txt"), ("All Files", "*.*")],
+            initialdir=corrections_dir
+        )
+
+        if filename:
+            self.show_corrections_panel(filename)
+
+    def check_for_corrections_file(self):
+        """Check if a new CORRECTIONS_NEEDED file was created and show panel"""
+        import glob
+
+        corrections_dir = rf"{BASE_DIR}\Outputs\Detailed match results"
+        pattern = str(Path(corrections_dir) / "CORRECTIONS_NEEDED_*.txt")
+        corrections_files = glob.glob(pattern)
+
+        if corrections_files:
+            # Sort by modification time (most recent first)
+            corrections_files.sort(key=lambda x: Path(x).stat().st_mtime, reverse=True)
+            latest_file = corrections_files[0]
+
+            # Check if file is less than 5 minutes old
+            file_age = Path(latest_file).stat().st_mtime
+            current_time = Path(latest_file).stat().st_mtime
+
+            # Show corrections panel
+            self.show_corrections_panel(latest_file)
 
 
 def main():

@@ -28,62 +28,79 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 # Configuration
 BASE_DIR = r"C:\Users\Marco.Africani\Desktop\Month recap"
 LEARNING_DB_FILE = rf"{BASE_DIR}\wine_names_learning_db.txt"
-CORRECTIONS_DIR = rf"{BASE_DIR}\Outputs"  # Look for corrections files in Outputs folder
+CORRECTIONS_DIR = rf"{BASE_DIR}\Outputs\Detailed match results"  # Look for corrections files here
 
 
 def parse_corrections_file(corrections_file):
     """
     Parse the corrections file and extract wine entries with corrected Item Numbers.
 
-    Format expected:
-    Wine Name | Vintage | Item No. | Notes
+    New format expected:
+    N. WINE FROM MULTI.TXT:
+       Name: Wine Name
+       Vintage: Vintage
+       CHF Price: Price
+       Min Qty: Qty
+
+       MATCHED TO DATABASE:
+       Wine: Matched Wine
+       Vintage: Matched Vintage
+       Item No.: Item Number
+
+       REASON: Reason
+
+       >>> CORRECTED_ITEM_NO: [manual entry here]
     """
     corrections = []
+    current_entry = {}
 
     try:
         with open(corrections_file, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
         for line in lines:
-            line = line.strip()
+            line_stripped = line.strip()
 
-            # Skip empty lines, comments, headers, and instruction lines
-            if not line or line.startswith('#') or line.startswith('=') or line.startswith('-'):
-                continue
-            if line.startswith('[') and ']' in line:
-                # Skip entry headers like "[1] Original wine name"
-                continue
-            if 'INSTRUCTIONS' in line or 'Format:' in line or 'Generated:' in line:
-                continue
-            if 'WINE CORRECTIONS FILE' in line or 'PROCESSING COMPLETE' in line:
+            # Skip empty lines and headers
+            if not line_stripped or line_stripped.startswith('='):
                 continue
 
-            # Parse wine entry
-            # Format: Wine Name | Vintage | Item No. | Notes
-            parts = line.split(' | ')
+            # Check for manual correction field
+            if 'CORRECTED_ITEM_NO:' in line:
+                # Extract the manually entered Item Number
+                parts = line.split('CORRECTED_ITEM_NO:')
+                if len(parts) >= 2:
+                    corrected_item_no = parts[1].strip()
 
-            if len(parts) >= 3:
-                wine_name = parts[0].strip()
-                vintage = parts[1].strip()
-                item_no = parts[2].strip()
+                    # Only process if user entered a value
+                    if corrected_item_no and corrected_item_no != '':
+                        # Validate Item No is numeric
+                        try:
+                            int(corrected_item_no)
+                            current_entry['corrected_item_no'] = corrected_item_no
+                        except ValueError:
+                            print(f"⚠️  Invalid Item No '{corrected_item_no}' - skipping")
+                            current_entry = {}
+                            continue
 
-                # Skip entries that haven't been corrected
-                if item_no == 'YOUR_ITEM_NO_HERE' or not item_no:
-                    print(f"⏭️  Skipping uncorrected entry: {wine_name} {vintage}")
-                    continue
+                # Finalize current entry if we have all required fields
+                if current_entry.get('wine_name') and current_entry.get('vintage') and current_entry.get('corrected_item_no'):
+                    corrections.append({
+                        'wine_name': current_entry['wine_name'],
+                        'vintage': current_entry['vintage'],
+                        'item_no': current_entry['corrected_item_no']
+                    })
+                    print(f"✅ Found correction: {current_entry['wine_name']} {current_entry['vintage']} → Item No. {current_entry['corrected_item_no']}")
 
-                # Validate Item No is numeric
-                try:
-                    int(item_no)
-                except ValueError:
-                    print(f"⚠️  Invalid Item No '{item_no}' for {wine_name} {vintage} - skipping")
-                    continue
+                # Reset for next entry
+                current_entry = {}
+                continue
 
-                corrections.append({
-                    'wine_name': wine_name,
-                    'vintage': vintage,
-                    'item_no': item_no
-                })
+            # Parse entry fields
+            if line_stripped.startswith('Name:'):
+                current_entry['wine_name'] = line_stripped.replace('Name:', '').strip()
+            elif line_stripped.startswith('Vintage:') and 'wine_name' in current_entry:
+                current_entry['vintage'] = line_stripped.replace('Vintage:', '').strip()
 
     except FileNotFoundError:
         print(f"❌ Error: Corrections file not found: {corrections_file}")

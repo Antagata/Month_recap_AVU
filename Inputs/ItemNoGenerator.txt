@@ -1,9 +1,79 @@
-Sassicaia 2021
-Palmer 2015                               
-Evangile 2015                                 
-la mission 2021                           
-Malescot 2022                                
-Montrose 2021                                 
-Cos d'Estournel 2021                      
-Figeac 2018                              
-pavie 2019                                
+# Wine List for Item Number Matching
+# Generated: 2025-11-26 08:27:49
+#
+# Format: Wine Name | Vintage
+# One wine per line
+#
+
+Magnum Cristal Rosé | 2014
+Bollinger RD | 2008
+Champagne Brut Cristal - Louis Roederer | 2012
+Champagne Grande Année Bollinger | 2015
+Château Haut-Marbuzet | 2019
+Phélan Ségur | 2018
+Crognolo | 2022
+Château Grand-Puy-Lacoste | 2021
+Château Phélan Ségur | 2021
+Aromes de Pavie | 2020
+Fieuzal Rouge | 2023
+Tignanello - Antinori | 2022
+Guado al Tasso | 2022
+Paleo Rosso | 2021
+Château Croix de Labrie | 2022
+Le Serre Nuove dell’Ornellaia | 2022
+Vigna d’Alceo | 2019
+San Leonardo | 2020
+Château Issan | 2022
+Argentiera | 2021
+Argentiera | 2022
+Clos Apalta | 2021
+Barolo Ginestra Casa Maté | 2021
+Cos d’Estournel | 2021
+Château Giscours | 2022
+Châteauneuf-du-Pape – Clos des Papes – | 2023
+Pape Clément Rouge | 2022
+Larcis Ducase | 2022
+Château Bélair-Monange | 2020
+Riesling Vogelsang Grosse Lage | 2020
+La Joie, Vérité | 2008
+Único | 2014
+Château Calon Ségur | 2005
+Ornellaia | 2021
+Château Figeac | 2018
+Smith Haut Lafitte Blanc | 2018
+Bibi Graetz Colore | 2021
+Château Canon | 2015
+Château Pavie | 2019
+Castillo Ygay | 2011
+Solaia | 2021
+Opus One | 2022
+Piedra Inifinita | 2021
+Vigna d’Alceo | 2006
+La Mission Haut Brion | 2016
+Don PX Convento Selectcion - | 1946
+Cuvée Annamaria Clementi Brut | 2016
+The Mascot | 2021
+Château Pavie - St. Emilion – | 2016
+Cabernet Sauvignon Private Reserve - Beaulieu Vineyard – | 2019
+La Faraona | 2023
+Ausone | 2009
+Corton Charlemagne Grand Cru | 2023
+Único | 2014
+Vintage Port Nacional | 2001
+Figeac | 2015
+Mouton Rothschild | 2016
+Lafleur | 2005
+Château Margaux | 2022
+Masseto | 2022
+Ausone | 2016
+Le Pin | 2020
+Mouton Rothschild | 2009
+Mouton Rothschild | 2009
+Cabernet Sauvignon - Eisele Vineyard – | 2019
+Barolo Monfortino Riserva | 2013
+Pétrus | 2000
+Echézeaux | 2022
+Trotanoy | 2009
+Cabernet Sauvignon - Eisele Vineyard | 2019
+Château Cheval Blanc, St. Emilion | 2000
+Château Cheval Blanc, St. Emilion – | 2021
