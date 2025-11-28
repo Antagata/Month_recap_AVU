@@ -25,21 +25,59 @@ LEARNING_DB = rf"{BASE_DIR}\wine_names_learning_db.txt"
 def extract_wine_names_from_multi(file_path):
     """Extract wine names and vintages from Multi.txt"""
     wines = []
+    seen_wines = set()  # Track duplicates
 
     with open(file_path, 'r', encoding='utf-8') as f:
         text = f.read()
 
-    # Pattern to match: "Wine Name VINTAGE : description"
-    pattern = r'([A-Z\u00C0-\u017F][^\n\d]*?)\s+(19\d{2}|20\d{2}|NV)\s*:'
+    # Pattern 1: Wine Name VINTAGE : description
+    # Pattern 2: Wine Name VINTAGE – something : description
+    # Pattern 3: Wine Name (no vintage) : description (for non-vintage wines)
 
-    for match in re.finditer(pattern, text, re.MULTILINE):
+    # Try to match wines with vintage first (with optional separator before colon)
+    pattern_with_vintage = r'([A-Z\u00C0-\u017F][^\n\d]*?)\s+(19\d{2}|20\d{2})\s*[–—-]*\s*:'
+
+    for match in re.finditer(pattern_with_vintage, text, re.MULTILINE):
         wine_name = match.group(1).strip()
         vintage = match.group(2)
 
         # Clean up emojis and special chars
         wine_name = re.sub(r'[✨💎💼🍷🏆⭐🎯]', '', wine_name).strip()
 
+        # Skip duplicates (same wine + vintage)
+        wine_key = f"{wine_name}|{vintage}"
+        if wine_key in seen_wines:
+            continue
+        seen_wines.add(wine_key)
+
         wines.append((wine_name, vintage))
+
+    # Now try to match non-vintage wines (no year before colon)
+    # But skip lines that already matched above
+    pattern_non_vintage = r'([A-Z\u00C0-\u017F][^\n:]*?)\s*:\s*[a-z]'
+
+    for match in re.finditer(pattern_non_vintage, text, re.MULTILINE):
+        wine_name = match.group(1).strip()
+
+        # Skip if it has a 4-digit year (already matched above)
+        if re.search(r'(19\d{2}|20\d{2})', wine_name):
+            continue
+
+        # Clean up emojis, special chars, and edition numbers
+        wine_name = re.sub(r'[✨💎💼🍷🏆⭐🎯]', '', wine_name).strip()
+        wine_name = re.sub(r'\s+\d+(?:ème|eme|th|nd|rd|st)\s+(?:Édition|Edition)', '', wine_name, flags=re.IGNORECASE).strip()
+
+        # Skip if wine_name is too short or generic
+        if len(wine_name) < 5 or wine_name.lower() in ['top wines', 'top selling', 'more expensive']:
+            continue
+
+        # Skip duplicates
+        wine_key = f"{wine_name}|NV"
+        if wine_key in seen_wines:
+            continue
+        seen_wines.add(wine_key)
+
+        wines.append((wine_name, 'NV'))
 
     return wines
 
@@ -199,47 +237,20 @@ def main():
         print("4. Run this script again")
         return 2  # Special return code for low quality
 
-    # STEP 4: Run conversion with matched Item Numbers
+    # STEP 4: Wine matching completed - corrections will be shown in GUI
     print("\n" + "="*80)
-    print("STEP 4: Running CHF to EUR Conversion...")
+    print("WINE MATCHING COMPLETED!")
     print("="*80)
+    print("\nNext steps:")
+    print("  1. Review corrections in the popup window")
+    print("  2. Edit vintages and Item Numbers as needed")
+    print("  3. Delete any unwanted wines")
+    print("  4. Click 'Apply All Corrections'")
+    print("  5. Then click 'Generate Lines.xlsx' button in GUI")
+    print("\nNOTE: Lines.xlsx will be generated AFTER you apply corrections!")
+    print("      This ensures all your corrections are included in the final output.")
 
-    try:
-        result = subprocess.run(
-            [sys.executable, "txt_converter.py", "0"],
-            cwd=Path(__file__).parent,
-            capture_output=True,
-            text=True,
-            encoding='utf-8',
-            errors='replace'
-        )
-
-        # Print output with error handling for emojis
-        try:
-            print(result.stdout)
-            if result.stderr:
-                print(result.stderr)
-        except UnicodeEncodeError:
-            # If Windows console can't handle UTF-8, replace problematic chars
-            print(result.stdout.encode('ascii', errors='replace').decode('ascii'))
-            if result.stderr:
-                print(result.stderr.encode('ascii', errors='replace').decode('ascii'))
-
-        if result.returncode == 0:
-            print("\n" + "="*80)
-            print("[OK] CONVERSION COMPLETED SUCCESSFULLY!")
-            print("="*80)
-            print("\nGenerated files:")
-            print(f"  - Lines.xlsx (in correct order from Multi.txt)")
-            print(f"  - Multi_converted_*.txt")
-            return 0
-        else:
-            print("\n[ERROR] Conversion failed")
-            return 1
-
-    except Exception as e:
-        print(f"[ERROR] Failed to run converter: {e}")
-        return 1
+    return 0  # Success - corrections file was created in txt_converter
 
 
 if __name__ == "__main__":
